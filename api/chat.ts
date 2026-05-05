@@ -1,4 +1,4 @@
-import { handleChatRequest } from "../server/chatApi";
+import { handleChatRequest } from "../server/chatApi.js";
 
 interface ApiRequest {
   method?: string;
