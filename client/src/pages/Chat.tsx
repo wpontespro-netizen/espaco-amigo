@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Copy, Send } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
@@ -25,13 +26,14 @@ interface ChatApiResponse {
 
 export default function Chat() {
   const [, setLocation] = useLocation();
-  const userName = sessionStorage.getItem("espacoAmigoUserName")?.trim();
+  const { user } = useAuth();
+  const userName = user?.name || sessionStorage.getItem("espacoAmigoUserName")?.trim();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: "app",
       text: userName
-        ? `Prazer, ${userName} 🙂\nComo você está hoje?`
+        ? `Oi, ${userName}… como você está hoje?`
         : "Prazer em te receber por aqui 🙂\nComo você está hoje?",
     },
   ]);
@@ -47,6 +49,22 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!user?.name) return;
+
+    setMessages((prev) => {
+      if (prev.length !== 1 || prev[0].type !== "app") return prev;
+      if (!prev[0].text.startsWith("Prazer em te receber")) return prev;
+
+      return [
+        {
+          ...prev[0],
+          text: `Oi, ${user.name}… como você está hoje?`,
+        },
+      ];
+    });
+  }, [user]);
 
   useEffect(() => {
     if (copyLabel === "Copiar conversa") return;

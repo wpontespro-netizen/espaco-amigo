@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Send } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * TELA 2: INÍCIO DA CONVERSA
@@ -12,7 +13,15 @@ import { useState } from "react";
  */
 export default function ChatStart() {
   const [, setLocation] = useLocation();
+  const { isLoading, user } = useAuth();
   const [name, setName] = useState("");
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      sessionStorage.removeItem("espacoAmigoUserName");
+      setLocation("/chat");
+    }
+  }, [isLoading, setLocation, user]);
 
   const handleSend = () => {
     const trimmedName = name.trim();
@@ -61,9 +70,15 @@ export default function ChatStart() {
               fontSize: "16px",
             }}
           >
-            Oi… que bom que você está aqui
-            <br />
-            Antes de tudo, como posso te chamar?
+            {isLoading
+              ? "Só um instante..."
+              : "Oi… que bom que você está aqui"}
+            {!isLoading && (
+              <>
+                <br />
+                Antes de tudo, como posso te chamar?
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -81,6 +96,7 @@ export default function ChatStart() {
                 handleSend();
               }
             }}
+            disabled={isLoading}
             className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 transition-smooth"
             style={{
               borderColor: "oklch(0.92 0.01 65)",
@@ -90,7 +106,7 @@ export default function ChatStart() {
           />
           <button
             onClick={handleSend}
-            disabled={!name.trim()}
+            disabled={!name.trim() || isLoading}
             className="p-3 rounded-2xl transition-smooth disabled:opacity-50"
             style={{
               backgroundColor: name.trim()

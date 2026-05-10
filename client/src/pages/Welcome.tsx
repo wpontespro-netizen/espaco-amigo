@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   ArrowRight,
   Brain,
@@ -6,6 +7,7 @@ import {
   Footprints,
   Heart,
   LockKeyhole,
+  LogOut,
   MessageCircle,
   Moon,
   PlayCircle,
@@ -76,8 +78,12 @@ const professionals = [
 
 export default function Welcome() {
   const [, setLocation] = useLocation();
+  const { isLoading, logout, user } = useAuth();
 
   const goToChat = () => setLocation("/chat-start");
+  const startGoogleLogin = () => {
+    window.location.href = "/api/auth/google/start";
+  };
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -137,14 +143,40 @@ export default function Welcome() {
               </button>
             </nav>
 
-            <button
-              onClick={goToChat}
-              className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur transition-smooth hover:bg-white/10"
-              type="button"
-            >
-              <UserRound className="h-4 w-4 text-[#f4a5d7]" />
-              Entrar
-            </button>
+            {user ? (
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white/90 backdrop-blur">
+                {user.picture ? (
+                  <img
+                    src={user.picture}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full border border-white/20"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                    <UserRound className="h-4 w-4 text-[#f4a5d7]" />
+                  </div>
+                )}
+                <span className="hidden max-w-36 truncate font-semibold sm:inline">{user.name}</span>
+                <button
+                  onClick={() => void logout()}
+                  className="flex items-center gap-1 rounded-xl px-2 py-1 text-white/72 transition-smooth hover:bg-white/10 hover:text-white"
+                  type="button"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={startGoogleLogin}
+                disabled={isLoading}
+                className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur transition-smooth hover:bg-white/10 disabled:opacity-60"
+                type="button"
+              >
+                <UserRound className="h-4 w-4 text-[#f4a5d7]" />
+                Entrar
+              </button>
+            )}
           </header>
 
           <div id="inicio" className="grid min-h-[78vh] items-center gap-10 py-16 lg:grid-cols-[1fr_0.95fr]">

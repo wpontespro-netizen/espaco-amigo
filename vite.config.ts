@@ -5,6 +5,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import {
+  completeGoogleAuth,
+  createGoogleAuthStart,
+  createLogoutCookie,
+  getSessionUser,
+  serializeCookie,
+} from "./server/authApi";
 import { handleChatRequest, loadLocalEnv } from "./server/chatApi";
 
 // =============================================================================
@@ -244,7 +251,81 @@ function vitePluginChatApi(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy(), vitePluginChatApi()];
+function vitePluginAuthApi(): Plugin {
+  return {
+    name: "espaco-amigo-auth-api",
+    configureServer(server: ViteDevServer) {
+      loadLocalEnv(PROJECT_ROOT);
+
+      server.middlewares.use("/api/auth", (req, res, next) => {
+        const baseUrl = getDevBaseUrl(req);
+        const pathname = req.url?.split("?")[0] || "";
+
+        if (req.method === "GET" && pathname === "/google/start") {
+          try {
+            const result = createGoogleAuthStart(baseUrl);
+            res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
+            res.writeHead(302, { Location: result.redirectUrl });
+            res.end();
+          } catch (error) {
+            console.error("Google auth start error:", error);
+            res.writeHead(500, { "Content-Type": "text/plain" });
+            res.end("Login com Google não está configurado.");
+          }
+          return;
+        }
+
+        if (req.method === "GET" && pathname === "/google/callback") {
+          const callbackUrl = new URL(req.url || "", `${baseUrl}/api/auth`);
+
+          completeGoogleAuth({
+            baseUrl,
+            code: callbackUrl.searchParams.get("code") || undefined,
+            cookieHeader: req.headers.cookie,
+            state: callbackUrl.searchParams.get("state") || undefined,
+          })
+            .then((result) => {
+              res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
+              res.writeHead(302, { Location: "/" });
+              res.end();
+            })
+            .catch((error) => {
+              console.error("Google auth callback error:", error);
+              res.writeHead(302, { Location: "/?login=erro" });
+              res.end();
+            });
+          return;
+        }
+
+        if (req.method === "GET" && pathname === "/session") {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ user: getSessionUser(req.headers.cookie) }));
+          return;
+        }
+
+        if (req.method === "POST" && pathname === "/logout") {
+          res.setHeader("Set-Cookie", serializeCookie(createLogoutCookie(baseUrl)));
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true }));
+          return;
+        }
+
+        next();
+      });
+    },
+  };
+}
+
+function getDevBaseUrl(req: any) {
+  const configuredUrl = process.env.APP_URL || process.env.NEXTAUTH_URL || process.env.AUTH_URL;
+  if (configuredUrl) return configuredUrl.replace(/\/+$/, "");
+
+  const proto = String(req.headers["x-forwarded-proto"] || "http").split(",")[0];
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "127.0.0.1:3000").split(",")[0];
+  return `${proto}://${host}`;
+}
+
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy(), vitePluginChatApi(), vitePluginAuthApi()];
 
 export default defineConfig({
   plugins,
