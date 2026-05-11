@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Copy, Send } from "lucide-react";
+import { ArrowLeft, Mail, Send } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 
@@ -42,7 +42,7 @@ export default function Chat() {
   const [riskDetected, setRiskDetected] = useState(false);
   const [endReached, setEndReached] = useState(false);
   const [showProfessionals, setShowProfessionals] = useState(false);
-  const [copyLabel, setCopyLabel] = useState("Copiar conversa");
+  const [continueAfterLimit, setContinueAfterLimit] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll
@@ -66,16 +66,6 @@ export default function Chat() {
     });
   }, [user]);
 
-  useEffect(() => {
-    if (copyLabel === "Copiar conversa") return;
-
-    const timeoutId = window.setTimeout(() => {
-      setCopyLabel("Copiar conversa");
-    }, 1800);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [copyLabel]);
-
   const formatConversation = () => {
     const conversation = messages
       .map((msg) => {
@@ -87,13 +77,24 @@ export default function Chat() {
     return `Espaço Amigo - Conversa\n\n${conversation}`;
   };
 
-  const handleCopyConversation = async () => {
-    try {
-      await navigator.clipboard.writeText(formatConversation());
-      setCopyLabel("Copiado");
-    } catch {
-      setCopyLabel("Não foi possível copiar");
-    }
+  const buildConversationMailto = () => {
+    const body = [
+      `Nome: ${userName || "Não informado"}`,
+      `Email: ${user?.email || "Não informado"}`,
+      `Data/hora: ${new Date().toLocaleString("pt-BR")}`,
+      "",
+      formatConversation(),
+      "",
+      "Conversa enviada a partir do Espaço Amigo.",
+    ].join("\n");
+
+    return `mailto:wpontes.pro@gmail.com?subject=${encodeURIComponent(
+      "Conversa do Espaço Amigo",
+    )}&body=${encodeURIComponent(body)}`;
+  };
+
+  const sendConversationToProfessional = () => {
+    window.location.href = buildConversationMailto();
   };
 
   const handleSendMessage = async () => {
@@ -152,43 +153,28 @@ export default function Chat() {
   const showRiskButton = riskDetected;
   const showEndActions = !riskDetected && endReached;
   const showProfessionalsButton = !riskDetected && !endReached && showProfessionals;
-  const shouldHideInput = showRiskButton || showEndActions || showProfessionalsButton;
+  const shouldHideInput = showRiskButton || ((showEndActions || showProfessionalsButton) && !continueAfterLimit);
 
   return (
-    <div className="mobile-screen min-h-screen flex flex-col bg-white">
+    <div className="mobile-screen min-h-screen flex flex-col bg-[#050a1c] text-white">
       {/* Header */}
-      <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
+      <div className="flex items-center gap-4 border-b border-white/10 bg-[#071027]/95 px-6 py-4">
         <button
-          onClick={() => setLocation("/")}
-          className="p-2 hover:bg-gray-50 rounded-lg transition-smooth"
+          onClick={() => setLocation(user ? "/espaco" : "/")}
+          className="rounded-xl p-2 text-white/78 transition-smooth hover:bg-white/10 hover:text-white"
         >
-          <ArrowLeft size={24} style={{ color: "oklch(0.3 0.02 65)" }} />
+          <ArrowLeft size={24} />
         </button>
-        <h2
-          className="text-xl font-bold"
-          style={{
-            fontFamily: "'Poppins', sans-serif",
-            color: "oklch(0.3 0.02 65)",
-          }}
-        >
-          Espaço Amigo
-        </h2>
-        <button
-          onClick={handleCopyConversation}
-          className="ml-auto flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-smooth hover:bg-gray-50"
-          style={{
-            color: "oklch(0.3 0.02 65)",
-            fontFamily: "'Inter', sans-serif",
-          }}
-          type="button"
-        >
-          <Copy size={16} />
-          {copyLabel}
-        </button>
+        <div>
+          <h2 className="text-xl font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
+            Espaço Amigo
+          </h2>
+          <p className="text-xs text-white/55">um espaço seguro para conversar</p>
+        </div>
       </div>
 
       {/* Área de mensagens */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto bg-[radial-gradient(circle_at_top,#172354_0%,#050a1c_45%,#040817_100%)] px-6 py-6">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -197,13 +183,13 @@ export default function Chat() {
             } animate-fade-in`}
           >
             <div
-              className="max-w-xs px-4 py-3 rounded-3xl"
+              className={`max-w-xs rounded-3xl border px-4 py-3 shadow-lg ${
+                msg.type === "user"
+                  ? "border-[#ffb3ce]/25 bg-gradient-to-br from-[#9f82ff] to-[#ff9c91] text-white"
+                  : "border-white/10 bg-white/[0.08] text-white"
+              }`}
               style={{
-                backgroundColor:
-                  msg.type === "user"
-                    ? "oklch(0.92 0.05 240)"
-                    : "oklch(0.97 0.01 65)",
-                color: "oklch(0.3 0.02 65)",
+                backdropFilter: "blur(12px)",
               }}
             >
               <p
@@ -224,27 +210,27 @@ export default function Chat() {
         {isLoading && (
           <div className="flex justify-start">
             <div
-              className="max-w-xs px-4 py-3 rounded-3xl"
+              className="max-w-xs rounded-3xl border border-white/10 bg-white/[0.08] px-4 py-3"
               style={{
-                backgroundColor: "oklch(0.97 0.01 65)",
+                backdropFilter: "blur(12px)",
               }}
             >
               <div className="flex gap-2">
                 <div
                   className="w-2 h-2 rounded-full animate-bounce"
-                  style={{ backgroundColor: "oklch(0.3 0.02 65)" }}
+                  style={{ backgroundColor: "#ffb3ce" }}
                 />
                 <div
                   className="w-2 h-2 rounded-full animate-bounce"
                   style={{
-                    backgroundColor: "oklch(0.3 0.02 65)",
+                    backgroundColor: "#d7b8ff",
                     animationDelay: "0.1s",
                   }}
                 />
                 <div
                   className="w-2 h-2 rounded-full animate-bounce"
                   style={{
-                    backgroundColor: "oklch(0.3 0.02 65)",
+                    backgroundColor: "#86cfff",
                     animationDelay: "0.2s",
                   }}
                 />
@@ -257,38 +243,30 @@ export default function Chat() {
         {showRiskButton && (
           <div className="flex justify-center mt-8 animate-fade-in">
             <Button
-              onClick={() => setLocation("/professionals")}
-              className="px-6 py-3 rounded-2xl font-semibold transition-smooth"
-              style={{
-                backgroundColor: "oklch(0.6 0.15 240)",
-                color: "white",
-              }}
+              onClick={sendConversationToProfessional}
+              className="rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-6 py-3 font-semibold text-white transition-smooth"
             >
-              Falar com um psicólogo agora
+              <Mail className="mr-2 h-4 w-4" />
+              Enviar conversa para um profissional
             </Button>
           </div>
         )}
 
         {/* Ações ao final do limite */}
         {showEndActions && (
-          <div className="space-y-3 mt-8 animate-fade-in">
+          <div className="mt-8 space-y-3 rounded-3xl border border-white/10 bg-white/[0.06] p-4 animate-fade-in">
+            <p className="text-center text-sm text-white/68">
+              Você pode seguir conversando, mas também pode chamar ajuda humana quando fizer sentido.
+            </p>
             <Button
-              onClick={() => setLocation("/professionals")}
-              className="w-full py-3 rounded-2xl font-semibold transition-smooth"
-              style={{
-                backgroundColor: "oklch(0.75 0.08 160)",
-                color: "white",
-              }}
+              onClick={sendConversationToProfessional}
+              className="w-full rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] py-3 font-semibold text-white transition-smooth"
             >
-              Ver profissionais
+              Conversar com profissional
             </Button>
             <Button
-              onClick={() => setLocation("/continuity")}
-              className="w-full py-3 rounded-2xl font-semibold transition-smooth"
-              style={{
-                backgroundColor: "oklch(0.85 0.13 85)",
-                color: "oklch(0.3 0.02 65)",
-              }}
+              onClick={() => setContinueAfterLimit(true)}
+              className="w-full rounded-2xl border border-white/10 bg-white px-5 py-3 font-semibold text-[#101735] transition-smooth hover:bg-white/90"
             >
               Continuar conversa
             </Button>
@@ -299,14 +277,11 @@ export default function Chat() {
         {showProfessionalsButton && (
           <div className="flex justify-center mt-8 animate-fade-in">
             <Button
-              onClick={() => setLocation("/professionals")}
-              className="px-8 py-3 rounded-2xl font-semibold transition-smooth"
-              style={{
-                backgroundColor: "oklch(0.6 0.15 240)",
-                color: "white",
-              }}
+              onClick={sendConversationToProfessional}
+              className="rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-8 py-3 font-semibold text-white transition-smooth"
             >
-              Ver profissionais
+              <Mail className="mr-2 h-4 w-4" />
+              Enviar conversa para um profissional
             </Button>
           </div>
         )}
@@ -316,7 +291,7 @@ export default function Chat() {
 
       {/* Campo de entrada */}
       {!shouldHideInput && (
-        <div className="px-6 py-6 border-t border-gray-100 bg-white">
+        <div className="border-t border-white/10 bg-[#071027]/95 px-6 py-6">
           <div className="flex gap-3">
             <input
               type="text"
@@ -329,10 +304,8 @@ export default function Chat() {
                 }
               }}
               disabled={isLoading}
-              className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 transition-smooth disabled:opacity-50"
+              className="flex-1 rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 text-white placeholder:text-white/45 focus:outline-none focus:ring-2 focus:ring-[#d7b8ff]/50 transition-smooth disabled:opacity-50"
               style={{
-                borderColor: "oklch(0.92 0.01 65)",
-                color: "oklch(0.3 0.02 65)",
                 fontFamily: "'Inter', sans-serif",
               } as React.CSSProperties}
             />
@@ -343,8 +316,8 @@ export default function Chat() {
               style={{
                 backgroundColor:
                   userInput.trim() && !isLoading
-                    ? "oklch(0.6 0.15 240)"
-                    : "oklch(0.92 0.01 65)",
+                    ? "#9f82ff"
+                    : "rgba(255,255,255,0.12)",
               }}
             >
               <Send
@@ -352,7 +325,7 @@ export default function Chat() {
                 color={
                   userInput.trim() && !isLoading
                     ? "white"
-                    : "oklch(0.55 0.02 65)"
+                    : "rgba(255,255,255,0.42)"
                 }
               />
             </button>

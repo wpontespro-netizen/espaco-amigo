@@ -63,7 +63,7 @@ export default function Professionals() {
       {/* Header */}
       <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
         <button
-          onClick={() => setLocation("/chat")}
+          onClick={() => setLocation("/espaco")}
           className="p-2 hover:bg-gray-50 rounded-lg transition-smooth"
         >
           <ArrowLeft size={24} style={{ color: "oklch(0.3 0.02 65)" }} />
@@ -210,7 +210,7 @@ export default function Professionals() {
       {/* Botão de voltar */}
       <div className="px-6 py-6 border-t border-gray-100 bg-white">
         <button
-          onClick={() => setLocation("/")}
+          onClick={() => setLocation("/espaco")}
           className="w-full py-3 text-sm font-semibold rounded-2xl transition-smooth"
           style={{
             color: "oklch(0.55 0.02 65)",
@@ -218,7 +218,7 @@ export default function Professionals() {
             backgroundColor: "transparent",
           }}
         >
-          Voltar ao início
+          Voltar para o Espaço
         </button>
       </div>
     </div>

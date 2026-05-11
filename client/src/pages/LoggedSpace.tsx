@@ -3,11 +3,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   Bookmark,
   Brain,
-  ChevronRight,
   Heart,
   Home,
   LifeBuoy,
   LogOut,
+  Mail,
   MessageCircle,
   Music,
   Phone,
@@ -19,35 +19,36 @@ import {
   Users,
   Video,
   Wind,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 
-const moods = ["Ansiedade", "Solidão", "Pensamentos que doem", "Baixa autoestima", "Recaída", "Ver mais"];
+const moods = ["Ansiedade", "Solidão", "Pensamentos que doem", "Baixa autoestima", "Recaída"];
 
 const videos = [
   {
     title: "Quando a cabeça não para",
     duration: "1:12",
-    href: "https://www.tiktok.com/@espacoamigo",
+    source: "",
     tone: "from-violet-500/25 via-slate-900/70 to-[#07122c]",
   },
   {
     title: "3 passos para voltar ao agora",
     duration: "0:58",
-    href: "https://www.tiktok.com/@espacoamigo",
+    source: "",
     tone: "from-cyan-300/20 via-slate-900/70 to-[#081827]",
   },
   {
     title: "Respire. Um minuto pode mudar tudo",
     duration: "1:00",
-    href: "https://www.tiktok.com/@espacoamigo",
+    source: "",
     tone: "from-emerald-300/20 via-slate-900/70 to-[#0b1f1e]",
   },
   {
     title: "Pequenas escolhas salvam dias difíceis",
     duration: "1:04",
-    href: "https://www.tiktok.com/@espacoamigo",
+    source: "",
     tone: "from-rose-300/20 via-slate-900/70 to-[#211226]",
   },
 ];
@@ -62,8 +63,9 @@ const quickSupport = [
 const helpPhones = [
   { name: "CVV — 188", text: "Apoio emocional e prevenção do suicídio", time: "24h" },
   { name: "SAMU — 192", text: "Emergência médica", time: "24h" },
-  { name: "CAPS da sua região", text: "Apoio em saúde mental", time: "Horário comercial" },
   { name: "Violência contra a mulher — 180", text: "Central de atendimento à mulher", time: "24h" },
+  { name: "Narcóticos Anônimos", text: "Apoio para dependência química", time: "Grupos de apoio" },
+  { name: "Alcoólicos Anônimos", text: "Apoio para problemas com álcool", time: "Grupos de apoio" },
 ];
 
 const professionals = [
@@ -87,6 +89,7 @@ export default function LoggedSpace() {
   const [, setLocation] = useLocation();
   const { isLoading, logout, user } = useAuth();
   const [selectedMood, setSelectedMood] = useState("Ansiedade");
+  const [activeVideo, setActiveVideo] = useState<(typeof videos)[number] | null>(null);
 
   const goToChat = () => setLocation("/chat-start");
   const scrollToSection = (id: string) => {
@@ -94,6 +97,19 @@ export default function LoggedSpace() {
   };
   const showPlaceholder = (label: string) => {
     alert(`${label} em breve no Espaço Amigo.`);
+  };
+  const buildProfessionalMailto = (professionalName: string) => {
+    const body = [
+      `Nome do usuário: ${user?.name || "Não informado"}`,
+      `Email do usuário: ${user?.email || "Não informado"}`,
+      `Profissional escolhido: ${professionalName}`,
+      "",
+      "Gostaria de conversar com este profissional.",
+    ].join("\n");
+
+    return `mailto:wpontes.pro@gmail.com?subject=${encodeURIComponent(
+      "Contato pelo Espaço Amigo",
+    )}&body=${encodeURIComponent(body)}`;
   };
 
   if (isLoading) {
@@ -232,28 +248,25 @@ export default function LoggedSpace() {
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {videos.map((video) => (
-                <a
+                <button
                   key={video.title}
-                  href={video.href}
-                  target="_blank"
-                  rel="noreferrer"
+                  onClick={() => setActiveVideo(video)}
                   className={`min-h-48 rounded-3xl border border-white/10 bg-gradient-to-br ${video.tone} p-5 transition-smooth hover:border-white/25`}
+                  type="button"
                 >
                   <div className="flex items-center justify-between text-sm text-white/68">
                     <span>Espaço Amigo</span>
-                    <span>TikTok</span>
+                    <span>Interno</span>
                   </div>
-                  <h3 className="mt-10 text-xl font-bold leading-tight">{video.title}</h3>
+                  <h3 className="mt-10 text-left text-xl font-bold leading-tight">{video.title}</h3>
                   <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-black/25 px-3 py-1 text-xs">
                     <Play className="h-3.5 w-3.5" />
                     {video.duration}
                   </div>
-                </a>
+                </button>
               ))}
             </div>
-            <p className="mt-4 text-sm text-white/58">
-              Ao clicar, você será direcionado para o TikTok do Espaço Amigo.
-            </p>
+            <p className="mt-4 text-sm text-white/58">Vídeos internos do Espaço Amigo. Em breve, estes cards podem receber arquivos locais ou URLs internas.</p>
           </section>
 
           <section id="recursos" className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
@@ -296,14 +309,6 @@ export default function LoggedSpace() {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => showPlaceholder("Contatos de ajuda")}
-                className="mt-5 flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/82 transition-smooth hover:bg-white/10"
-                type="button"
-              >
-                Ver todos os contatos
-                <ChevronRight className="h-4 w-4" />
-              </button>
             </div>
 
             <div id="psicologos" className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
@@ -317,16 +322,22 @@ export default function LoggedSpace() {
                     <h3 className="font-bold">{professional.name}</h3>
                     <p className="mt-1 text-sm text-white/62">{professional.area}</p>
                     <p className="mt-2 text-sm text-[#a5ffc1]">• {professional.status}</p>
+                    <a
+                      href={buildProfessionalMailto(professional.name)}
+                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-4 py-3 text-sm font-bold text-white transition-smooth hover:opacity-90"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Conversar com profissional
+                    </a>
                   </div>
                 ))}
               </div>
               <button
-                onClick={() => setLocation("/professionals")}
-                className="mt-5 flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/82 transition-smooth hover:bg-white/10"
+                onClick={() => showPlaceholder("Lista de psicólogos")}
+                className="mt-5 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/82 transition-smooth hover:bg-white/10"
                 type="button"
               >
                 Ver todos os psicólogos
-                <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           </section>
@@ -344,6 +355,33 @@ export default function LoggedSpace() {
           </section>
         </div>
       </div>
+      {activeVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8">
+          <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-[#0b1028] p-5 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm text-white/58">Espaço Amigo</p>
+                <h3 className="mt-1 text-2xl font-bold">{activeVideo.title}</h3>
+              </div>
+              <button
+                onClick={() => setActiveVideo(null)}
+                className="rounded-full border border-white/10 p-2 text-white/70 transition-smooth hover:bg-white/10 hover:text-white"
+                type="button"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className={`mt-5 flex aspect-video items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br ${activeVideo.tone}`}>
+              <div className="rounded-full bg-black/30 p-5">
+                <Play className="h-9 w-9 fill-white/80 text-white" />
+              </div>
+            </div>
+            <p className="mt-4 text-sm leading-6 text-white/64">
+              Placeholder interno preparado para receber um vídeo local ou uma URL interna do Espaço Amigo.
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
