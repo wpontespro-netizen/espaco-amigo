@@ -12,12 +12,14 @@ import Feedback from "./pages/Feedback";
 import Continuity from "./pages/Continuity";
 import Referral from "./pages/Referral";
 import Professionals from "./pages/Professionals";
+import LoggedSpace from "./pages/LoggedSpace";
 
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Welcome} />
+      <Route path="/espaco" component={LoggedSpace} />
       <Route path="/chat-start" component={ChatStart} />
       <Route path="/chat" component={Chat} />
       <Route path="/feedback" component={Feedback} />

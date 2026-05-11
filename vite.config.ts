@@ -286,7 +286,7 @@ function vitePluginAuthApi(): Plugin {
           })
             .then((result) => {
               res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
-              res.writeHead(302, { Location: "/" });
+              res.writeHead(302, { Location: "/espaco" });
               res.end();
             })
             .catch((error) => {

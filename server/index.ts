@@ -59,7 +59,7 @@ async function startServer() {
         state: typeof req.query.state === "string" ? req.query.state : undefined,
       });
       res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
-      res.redirect("/");
+      res.redirect("/espaco");
     } catch (error) {
       console.error("Google auth callback error:", error);
       res.redirect("/?login=erro");
