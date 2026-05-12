@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Bookmark,
-  Brain,
   Heart,
   Home,
   LifeBuoy,
@@ -55,10 +54,18 @@ const videos = [
 
 const quickSupport = [
   { title: "Chat de acolhimento", text: "Fale no seu tempo.", icon: MessageCircle, action: "chat" },
-  { title: "Respire um pouco", text: "Um minuto de pausa.", icon: Wind, action: "placeholder" },
-  { title: "Frases para hoje", text: "Palavras simples para seguir.", icon: Sparkles, action: "placeholder" },
   { title: "Áudios de acolhimento", text: "Em breve por aqui.", icon: Music, action: "placeholder" },
 ];
+
+const todayPhrases = [
+  "Você não precisa resolver tudo agora.",
+  "Um passo pequeno ainda é um passo.",
+  "Respirar também é continuar.",
+  "Você pode atravessar este momento com calma.",
+  "Não estar bem também faz parte de ser humano.",
+];
+
+const breathingSteps = ["Inspire devagar", "Segure por um instante", "Solte o ar com calma"];
 
 const helpPhones = [
   { name: "CVV — 188", text: "Apoio emocional e prevenção do suicídio", time: "24h" },
@@ -90,6 +97,8 @@ export default function LoggedSpace() {
   const { isLoading, logout, user } = useAuth();
   const [selectedMood, setSelectedMood] = useState("Ansiedade");
   const [activeVideo, setActiveVideo] = useState<(typeof videos)[number] | null>(null);
+  const [activeSupport, setActiveSupport] = useState<"phrases" | "breathe" | null>(null);
+  const [phraseIndex, setPhraseIndex] = useState(0);
 
   const goToChat = () => setLocation("/chat-start");
   const scrollToSection = (id: string) => {
@@ -97,6 +106,28 @@ export default function LoggedSpace() {
   };
   const showPlaceholder = (label: string) => {
     alert(`${label} em breve no Espaço Amigo.`);
+  };
+  const openSupport = (action: string, title: string) => {
+    if (action === "chat") {
+      goToChat();
+      return;
+    }
+
+    if (action === "phrases" || action === "breathe") {
+      setActiveSupport(action);
+      return;
+    }
+
+    showPlaceholder(title);
+  };
+  const closeSupport = () => {
+    setActiveSupport(null);
+  };
+  const showAnotherPhrase = () => {
+    setPhraseIndex((current) => {
+      const next = Math.floor(Math.random() * todayPhrases.length);
+      return next === current ? (next + 1) % todayPhrases.length : next;
+    });
   };
   const buildProfessionalMailto = (professionalName: string) => {
     const body = [
@@ -270,13 +301,37 @@ export default function LoggedSpace() {
 
           <section id="recursos" className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
             <h2 className="text-2xl font-bold">Acolhimento rápido</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveSupport("breathe");
+                }}
+                className="cursor-pointer rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-left transition-smooth hover:bg-white/10"
+              >
+                <Wind className="h-7 w-7 text-[#d7b8ff]" />
+                <h3 className="mt-5 font-bold">Respire um pouco</h3>
+                <p className="mt-2 text-sm text-white/62">Um minuto de pausa.</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveSupport("phrases");
+                }}
+                className="cursor-pointer rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-left transition-smooth hover:bg-white/10"
+              >
+                <Sparkles className="h-7 w-7 text-[#d7b8ff]" />
+                <h3 className="mt-5 font-bold">Frases para hoje</h3>
+                <p className="mt-2 text-sm text-white/62">Palavras simples para seguir.</p>
+              </button>
+            </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {quickSupport.map((item) => {
                 const Icon = item.icon;
                 return (
                   <button
                     key={item.title}
-                    onClick={() => (item.action === "chat" ? goToChat() : showPlaceholder(item.title))}
+                    onClick={() => openSupport(item.action, item.title)}
                     className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-left transition-smooth hover:bg-white/10"
                     type="button"
                   >
@@ -385,6 +440,72 @@ export default function LoggedSpace() {
               controls
               src={activeVideo.source}
             />
+          </div>
+        </div>
+      )}
+      {activeSupport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-white/10 bg-[#0b1028] p-5 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm text-white/58">Espaço Amigo</p>
+                <h3 className="mt-1 text-2xl font-bold">
+                  {activeSupport === "phrases" ? "Frases para hoje" : "Respire um pouco"}
+                </h3>
+                <p className="mt-2 text-sm text-white/62">
+                  {activeSupport === "phrases"
+                    ? "Às vezes uma pausa também ajuda."
+                    : "Vamos fazer uma pausa curta. Não precisa resolver tudo agora."}
+                </p>
+              </div>
+              <button
+                onClick={closeSupport}
+                className="rounded-full border border-white/10 p-2 text-white/70 transition-smooth hover:bg-white/10 hover:text-white"
+                type="button"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {activeSupport === "phrases" ? (
+              <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.05] p-7 text-center">
+                <p className="mx-auto max-w-md text-2xl font-semibold leading-snug text-white">
+                  {todayPhrases[phraseIndex]}
+                </p>
+                <Button
+                  onClick={showAnotherPhrase}
+                  className="mt-7 rounded-2xl bg-white px-6 py-5 font-bold text-[#101735] hover:bg-white/90"
+                >
+                  Mostrar outra frase
+                </Button>
+              </div>
+            ) : null}
+
+            {activeSupport === "breathe" ? (
+              <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.05] p-7">
+                <div className="space-y-3">
+                  {breathingSteps.map((step, index) => (
+                    <div key={step} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                      <p className="text-xs font-semibold text-[#d7b8ff]">0{index + 1}</p>
+                      <p className="mt-1 text-lg font-semibold text-white">{step}</p>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => setActiveSupport("breathe")}
+                  className="mt-7 rounded-2xl bg-white px-6 py-5 font-bold text-[#101735] hover:bg-white/90"
+                >
+                  Começar novamente
+                </Button>
+              </div>
+            ) : null}
+            <button
+              onClick={closeSupport}
+              className="mt-5 w-full rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-white/78 transition-smooth hover:bg-white/10 hover:text-white"
+              type="button"
+            >
+              Fechar
+            </button>
           </div>
         </div>
       )}
