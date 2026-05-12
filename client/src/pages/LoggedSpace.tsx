@@ -30,25 +30,25 @@ const videos = [
   {
     title: "Quando a cabeça não para",
     duration: "1:12",
-    source: "",
+    source: "/videos/espaco_amigo_video_1_quando_a_cabeca_nao_para.mp4",
     tone: "from-violet-500/25 via-slate-900/70 to-[#07122c]",
   },
   {
     title: "3 passos para voltar ao agora",
     duration: "0:58",
-    source: "",
+    source: "/videos/espaco_amigo_video_2_3_passos_para_voltar_ao_agora.mp4",
     tone: "from-cyan-300/20 via-slate-900/70 to-[#081827]",
   },
   {
     title: "Respire. Um minuto pode mudar tudo",
     duration: "1:00",
-    source: "",
+    source: "/videos/espaco_amigo_video_3_respire_um_minuto_pode_mudar_tudo.mp4",
     tone: "from-emerald-300/20 via-slate-900/70 to-[#0b1f1e]",
   },
   {
     title: "Pequenas escolhas salvam dias difíceis",
     duration: "1:04",
-    source: "",
+    source: "/videos/espaco_amigo_video_4_pequenas_escolhas_salvam_dias_dificeis.mp4",
     tone: "from-rose-300/20 via-slate-900/70 to-[#211226]",
   },
 ];
@@ -64,8 +64,8 @@ const helpPhones = [
   { name: "CVV — 188", text: "Apoio emocional e prevenção do suicídio", time: "24h" },
   { name: "SAMU — 192", text: "Emergência médica", time: "24h" },
   { name: "Violência contra a mulher — 180", text: "Central de atendimento à mulher", time: "24h" },
-  { name: "Narcóticos Anônimos", text: "Apoio para dependência química", time: "Grupos de apoio" },
-  { name: "Alcoólicos Anônimos", text: "Apoio para problemas com álcool", time: "Grupos de apoio" },
+  { name: "Narcóticos Anônimos — 132", text: "Apoio para dependência química", time: "24h" },
+  { name: "Alcoólicos Anônimos", text: "Grupos de apoio e reuniões", time: "Grupos de apoio", link: "https://www.aa.org.br" },
 ];
 
 const professionals = [
@@ -266,7 +266,6 @@ export default function LoggedSpace() {
                 </button>
               ))}
             </div>
-            <p className="mt-4 text-sm text-white/58">Vídeos internos do Espaço Amigo. Em breve, estes cards podem receber arquivos locais ou URLs internas.</p>
           </section>
 
           <section id="recursos" className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
@@ -303,6 +302,16 @@ export default function LoggedSpace() {
                       <div>
                         <h3 className="font-bold">{phone.name}</h3>
                         <p className="mt-1 text-sm text-white/62">{phone.text}</p>
+                        {"link" in phone && phone.link ? (
+                          <a
+                            href={phone.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-2 inline-flex text-sm font-semibold text-[#d7b8ff] hover:text-white"
+                          >
+                            {phone.link}
+                          </a>
+                        ) : null}
                       </div>
                       <span className="rounded-full bg-[#70f29d]/14 px-3 py-1 text-xs text-[#a5ffc1]">{phone.time}</span>
                     </div>
@@ -371,14 +380,11 @@ export default function LoggedSpace() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className={`mt-5 flex aspect-video items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br ${activeVideo.tone}`}>
-              <div className="rounded-full bg-black/30 p-5">
-                <Play className="h-9 w-9 fill-white/80 text-white" />
-              </div>
-            </div>
-            <p className="mt-4 text-sm leading-6 text-white/64">
-              Placeholder interno preparado para receber um vídeo local ou uma URL interna do Espaço Amigo.
-            </p>
+            <video
+              className={`mt-5 aspect-video w-full rounded-3xl border border-white/10 bg-gradient-to-br ${activeVideo.tone}`}
+              controls
+              src={activeVideo.source}
+            />
           </div>
         </div>
       )}
