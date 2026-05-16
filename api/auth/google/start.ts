@@ -2,6 +2,7 @@ import { createGoogleAuthStart, serializeCookie } from "../../../server/authApi.
 
 interface ApiRequest {
   headers: Record<string, string | string[] | undefined>;
+  query?: Record<string, string | string[] | undefined>;
 }
 
 interface ApiResponse {
@@ -13,7 +14,8 @@ interface ApiResponse {
 
 export default function handler(req: ApiRequest, res: ApiResponse) {
   try {
-    const result = createGoogleAuthStart(getRequestBaseUrl(req));
+    const mode = firstHeader(req.query?.mode) || "login";
+    const result = createGoogleAuthStart(getRequestBaseUrl(req), mode);
     res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
     return res.redirect(result.redirectUrl);
   } catch (error) {

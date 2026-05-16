@@ -25,6 +25,9 @@ interface CookieOptions {
 
 const SESSION_COOKIE = "ea_session";
 const OAUTH_STATE_COOKIE = "ea_oauth_state";
+const OAUTH_MODE_COOKIE = "ea_oauth_mode";
+const PROFILE_COOKIE = "ea_profiles";
+const ACCOUNTS_COOKIE = "ea_accounts";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 const OAUTH_STATE_MAX_AGE = 60 * 10;
 const BIRTH_MONTHS = [
@@ -42,7 +45,7 @@ const BIRTH_MONTHS = [
   "Dezembro",
 ];
 
-export function createGoogleAuthStart(baseUrl: string) {
+export function createGoogleAuthStart(baseUrl: string, mode = "login") {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const secret = process.env.AUTH_SECRET;
 
@@ -67,6 +70,11 @@ export function createGoogleAuthStart(baseUrl: string) {
       {
         name: OAUTH_STATE_COOKIE,
         value: signedState,
+        options: baseCookieOptions(OAUTH_STATE_MAX_AGE, baseUrl),
+      },
+      {
+        name: OAUTH_MODE_COOKIE,
+        value: signValue(mode === "signup" ? "signup" : "login", secret),
         options: baseCookieOptions(OAUTH_STATE_MAX_AGE, baseUrl),
       },
     ],
@@ -140,15 +148,21 @@ export async function completeGoogleAuth({
     throw new Error("Google profile is missing required fields.");
   }
 
+  const profiles = readSignedJsonCookie<Record<string, Pick<AuthUser, "age" | "birthMonth">>>(cookies, PROFILE_COOKIE, secret, {});
+  const savedProfile = profiles[googleUser.sub];
   const user: AuthUser = {
     id: googleUser.sub,
     name: googleUser.name,
     email: googleUser.email,
     picture: googleUser.picture,
+    age: savedProfile?.age,
+    birthMonth: savedProfile?.birthMonth,
   };
+  const needsProfile = !user.age || !user.birthMonth;
 
   return {
     user,
+    needsProfile,
     cookies: [
       {
         name: SESSION_COOKIE,
@@ -160,11 +174,16 @@ export async function completeGoogleAuth({
         value: "",
         options: { ...baseCookieOptions(0, baseUrl), maxAge: 0 },
       },
+      {
+        name: OAUTH_MODE_COOKIE,
+        value: "",
+        options: { ...baseCookieOptions(0, baseUrl), maxAge: 0 },
+      },
     ],
   };
 }
 
-export function createEmailAccount(baseUrl: string, payload: unknown) {
+export function createEmailAccount(baseUrl: string, payload: unknown, cookieHeader = "") {
   const secret = process.env.AUTH_SECRET;
   if (!secret) {
     throw new Error("Auth is not configured. Set AUTH_SECRET.");
@@ -195,10 +214,25 @@ export function createEmailAccount(baseUrl: string, payload: unknown) {
     return { ok: false, errors };
   }
 
+  const cookies = parseCookies(cookieHeader || "");
+  const accounts = readSignedJsonCookie<Record<string, EmailAccount>>(cookies, ACCOUNTS_COOKIE, secret, {});
+  const accountKey = accountKeyForEmail(email);
+  if (accounts[accountKey]) {
+    return { ok: false, errors: { email: "Este email já possui uma conta." } };
+  }
+
   const user: AuthUser = {
-    id: `email:${crypto.createHash("sha256").update(email).digest("hex").slice(0, 24)}`,
+    id: `email:${accountKey}`,
     name,
     email,
+    age,
+    birthMonth,
+  };
+  accounts[accountKey] = {
+    id: user.id,
+    name,
+    email,
+    passwordHash: hashPassword(password, email),
     age,
     birthMonth,
   };
@@ -208,9 +242,91 @@ export function createEmailAccount(baseUrl: string, payload: unknown) {
     user,
     cookies: [
       {
+        name: ACCOUNTS_COOKIE,
+        value: signValue(JSON.stringify(accounts), secret),
+        options: baseCookieOptions(SESSION_MAX_AGE, baseUrl),
+      },
+      {
         name: SESSION_COOKIE,
         value: signValue(JSON.stringify(user), secret),
         options: baseCookieOptions(SESSION_MAX_AGE, baseUrl),
+      },
+    ],
+  };
+}
+
+export function loginEmailAccount(baseUrl: string, payload: unknown, cookieHeader = "") {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) throw new Error("Auth is not configured. Set AUTH_SECRET.");
+
+  const data = (payload || {}) as { email?: string; password?: string };
+  const email = String(data.email || "").trim().toLowerCase();
+  const password = String(data.password || "");
+  const errors: Record<string, string> = {};
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Informe um email válido.";
+  if (!password) errors.password = "Informe sua senha.";
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+
+  const cookies = parseCookies(cookieHeader || "");
+  const account = readSignedJsonCookie<Record<string, EmailAccount>>(cookies, ACCOUNTS_COOKIE, secret, {})[accountKeyForEmail(email)];
+  if (!account || account.passwordHash !== hashPassword(password, email)) {
+    return { ok: false, error: "Email ou senha inválidos." };
+  }
+
+  const user: AuthUser = {
+    id: account.id,
+    name: account.name,
+    email: account.email,
+    age: account.age,
+    birthMonth: account.birthMonth,
+  };
+  return {
+    ok: true,
+    user,
+    cookies: [
+      {
+        name: SESSION_COOKIE,
+        value: signValue(JSON.stringify(user), secret),
+        options: baseCookieOptions(SESSION_MAX_AGE, baseUrl),
+      },
+    ],
+  };
+}
+
+export function completeUserProfile(baseUrl: string, payload: unknown, cookieHeader = "") {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) throw new Error("Auth is not configured. Set AUTH_SECRET.");
+
+  const user = getSessionUser(cookieHeader);
+  if (!user) return { ok: false, error: "Sessão não encontrada." };
+
+  const data = (payload || {}) as { age?: number | string; birthMonth?: string };
+  const age = Number(data.age);
+  const birthMonth = String(data.birthMonth || "").trim();
+  const errors: Record<string, string> = {};
+  if (!Number.isFinite(age)) errors.age = "Informe sua idade.";
+  else if (age < 13) errors.age = "A idade mínima é 13 anos.";
+  if (!BIRTH_MONTHS.includes(birthMonth)) errors.birthMonth = "Escolha o mês de nascimento.";
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+
+  const updatedUser = { ...user, age, birthMonth };
+  const cookies = parseCookies(cookieHeader || "");
+  const profiles = readSignedJsonCookie<Record<string, Pick<AuthUser, "age" | "birthMonth">>>(cookies, PROFILE_COOKIE, secret, {});
+  profiles[user.id] = { age, birthMonth };
+
+  return {
+    ok: true,
+    user: updatedUser,
+    cookies: [
+      {
+        name: SESSION_COOKIE,
+        value: signValue(JSON.stringify(updatedUser), secret),
+        options: baseCookieOptions(SESSION_MAX_AGE, baseUrl),
+      },
+      {
+        name: PROFILE_COOKIE,
+        value: signValue(JSON.stringify(profiles), secret),
+        options: baseCookieOptions(SESSION_MAX_AGE * 12, baseUrl),
       },
     ],
   };
@@ -247,6 +363,15 @@ export function createLogoutCookie(baseUrl: string): AuthCookie {
     value: "",
     options: { ...baseCookieOptions(0, baseUrl), maxAge: 0 },
   };
+}
+
+interface EmailAccount {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  age: number;
+  birthMonth: string;
 }
 
 export function serializeCookie(cookie: AuthCookie) {
@@ -286,6 +411,24 @@ function verifySignedValue(signedValue: string, secret: string) {
   if (!timingSafeEqual(signature, expectedSignature)) return null;
 
   return Buffer.from(payload, "base64url").toString("utf-8");
+}
+
+function readSignedJsonCookie<T>(cookies: Record<string, string>, name: string, secret: string, fallback: T): T {
+  const raw = cookies[name] ? verifySignedValue(cookies[name], secret) : null;
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function accountKeyForEmail(email: string) {
+  return crypto.createHash("sha256").update(email).digest("hex").slice(0, 24);
+}
+
+function hashPassword(password: string, email: string) {
+  return crypto.createHash("sha256").update(`${email}:${password}`).digest("hex");
 }
 
 function timingSafeEqual(a: string, b: string) {

@@ -4,10 +4,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 import {
   completeGoogleAuth,
+  completeUserProfile,
   createEmailAccount,
   createGoogleAuthStart,
   createLogoutCookie,
   getSessionUser,
+  loginEmailAccount,
   serializeCookie,
 } from "./authApi";
 import { handleChatRequest, loadLocalEnv } from "./chatApi";
@@ -42,7 +44,7 @@ async function startServer() {
 
   app.get("/api/auth/google/start", (req, res) => {
     try {
-      const result = createGoogleAuthStart(getRequestBaseUrl(req));
+      const result = createGoogleAuthStart(getRequestBaseUrl(req), typeof req.query.mode === "string" ? req.query.mode : "login");
       const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
       res.setHeader("Set-Cookie", cookies.map(serializeCookie));
       res.redirect(result.redirectUrl);
@@ -61,7 +63,7 @@ async function startServer() {
         state: typeof req.query.state === "string" ? req.query.state : undefined,
       });
       res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
-      res.redirect("/espaco");
+      res.redirect(result.needsProfile ? "/?auth=complete" : "/espaco");
     } catch (error) {
       console.error("Google auth callback error:", error);
       res.redirect("/?login=erro");
@@ -74,7 +76,7 @@ async function startServer() {
 
   app.post("/api/auth/register", (req, res) => {
     try {
-      const result = createEmailAccount(getRequestBaseUrl(req), req.body);
+      const result = createEmailAccount(getRequestBaseUrl(req), req.body, req.headers.cookie);
       if (!result.ok) {
         res.status(400).json(result);
         return;
@@ -90,6 +92,38 @@ async function startServer() {
     } catch (error) {
       console.error("Email account creation error:", error);
       res.status(500).json({ ok: false, error: "Não foi possível criar sua conta agora." });
+    }
+  });
+
+  app.post("/api/auth/login", (req, res) => {
+    try {
+      const result = loginEmailAccount(getRequestBaseUrl(req), req.body, req.headers.cookie);
+      if (!result.ok) {
+        res.status(400).json(result);
+        return;
+      }
+      const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+      res.setHeader("Set-Cookie", cookies.map(serializeCookie));
+      res.json({ ok: true, user: result.user });
+    } catch (error) {
+      console.error("Email login error:", error);
+      res.status(500).json({ ok: false, error: "Não foi possível entrar agora." });
+    }
+  });
+
+  app.post("/api/auth/complete-profile", (req, res) => {
+    try {
+      const result = completeUserProfile(getRequestBaseUrl(req), req.body, req.headers.cookie);
+      if (!result.ok) {
+        res.status(400).json(result);
+        return;
+      }
+      const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+      res.setHeader("Set-Cookie", cookies.map(serializeCookie));
+      res.json({ ok: true, user: result.user });
+    } catch (error) {
+      console.error("Complete profile error:", error);
+      res.status(500).json({ ok: false, error: "Não foi possível completar seu espaço agora." });
     }
   });
 

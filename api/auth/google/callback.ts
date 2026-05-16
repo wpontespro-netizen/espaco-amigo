@@ -20,7 +20,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     });
 
     res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
-    return res.redirect("/espaco");
+    return res.redirect(result.needsProfile ? "/?auth=complete" : "/espaco");
   } catch (error) {
     console.error("Google auth callback serverless error:", error);
     return res.redirect("/?login=erro");

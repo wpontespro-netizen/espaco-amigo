@@ -21,7 +21,9 @@ export interface RegisterPayload {
 interface AuthContextValue {
   isLoading: boolean;
   loginWithGoogle: () => void;
+  loginWithEmail: (payload: Pick<RegisterPayload, "email" | "password">) => Promise<{ ok: boolean; error?: string; errors?: Record<string, string> }>;
   logout: () => Promise<void>;
+  completeProfile: (payload: Pick<RegisterPayload, "age" | "birthMonth">) => Promise<{ ok: boolean; error?: string; errors?: Record<string, string> }>;
   registerWithEmail: (payload: RegisterPayload) => Promise<{ ok: boolean; error?: string; errors?: Record<string, string> }>;
   refreshSession: () => Promise<void>;
   user: AuthUser | null;
@@ -57,9 +59,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginWithGoogle: () => {
         window.location.href = "/api/auth/google/start";
       },
+      loginWithEmail: async (payload) => {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = (await response.json()) as {
+          ok: boolean;
+          user?: AuthUser;
+          error?: string;
+          errors?: Record<string, string>;
+        };
+        if (response.ok && data.user) setUser(data.user);
+        return { ok: response.ok && data.ok, error: data.error, errors: data.errors };
+      },
       logout: async () => {
         await fetch("/api/auth/logout", { method: "POST" });
         setUser(null);
+      },
+      completeProfile: async (payload) => {
+        const response = await fetch("/api/auth/complete-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = (await response.json()) as {
+          ok: boolean;
+          user?: AuthUser;
+          error?: string;
+          errors?: Record<string, string>;
+        };
+        if (response.ok && data.user) setUser(data.user);
+        return { ok: response.ok && data.ok, error: data.error, errors: data.errors };
       },
       registerWithEmail: async (payload) => {
         const response = await fetch("/api/auth/register", {

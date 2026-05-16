@@ -7,10 +7,12 @@ import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 import {
   completeGoogleAuth,
+  completeUserProfile,
   createEmailAccount,
   createGoogleAuthStart,
   createLogoutCookie,
   getSessionUser,
+  loginEmailAccount,
   serializeCookie,
 } from "./server/authApi";
 import { handleChatRequest, loadLocalEnv } from "./server/chatApi";
@@ -264,7 +266,8 @@ function vitePluginAuthApi(): Plugin {
 
         if (req.method === "GET" && pathname === "/google/start") {
           try {
-            const result = createGoogleAuthStart(baseUrl);
+            const mode = new URL(req.url || "", `${baseUrl}/api/auth`).searchParams.get("mode") || "login";
+            const result = createGoogleAuthStart(baseUrl, mode);
             res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
             res.writeHead(302, { Location: result.redirectUrl });
             res.end();
@@ -288,7 +291,7 @@ function vitePluginAuthApi(): Plugin {
             .then((result) => {
               const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
               res.setHeader("Set-Cookie", cookies.map(serializeCookie));
-              res.writeHead(302, { Location: "/espaco" });
+              res.writeHead(302, { Location: result.needsProfile ? "/?auth=complete" : "/espaco" });
               res.end();
             })
             .catch((error) => {
@@ -314,7 +317,7 @@ function vitePluginAuthApi(): Plugin {
           req.on("end", () => {
             try {
               const payload = body ? JSON.parse(body) : {};
-              const result = createEmailAccount(baseUrl, payload);
+              const result = createEmailAccount(baseUrl, payload, req.headers.cookie);
               if (!result.ok) {
                 res.writeHead(400, { "Content-Type": "application/json" });
                 res.end(JSON.stringify(result));
@@ -326,13 +329,45 @@ function vitePluginAuthApi(): Plugin {
                 return;
               }
 
-              res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
+              const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+              res.setHeader("Set-Cookie", cookies.map(serializeCookie));
               res.writeHead(200, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ ok: true, user: result.user }));
             } catch (error) {
               console.error("Email account creation dev error:", error);
               res.writeHead(500, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ ok: false, error: "Não foi possível criar sua conta agora." }));
+            }
+          });
+          return;
+        }
+
+        if (req.method === "POST" && (pathname === "/login" || pathname === "/complete-profile")) {
+          let body = "";
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          req.on("end", () => {
+            try {
+              const payload = body ? JSON.parse(body) : {};
+              const result =
+                pathname === "/login"
+                  ? loginEmailAccount(baseUrl, payload, req.headers.cookie)
+                  : completeUserProfile(baseUrl, payload, req.headers.cookie);
+              if (!result.ok) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(result));
+                return;
+              }
+              const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+              res.setHeader("Set-Cookie", cookies.map(serializeCookie));
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: true, user: result.user }));
+            } catch (error) {
+              console.error("Auth dev endpoint error:", error);
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: false, error: "Não foi possível continuar agora." }));
             }
           });
           return;

@@ -20,7 +20,7 @@ import {
   Wind,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
 const contentCards = [
@@ -96,22 +96,27 @@ const birthMonths = [
 
 export default function Welcome() {
   const [, setLocation] = useLocation();
-  const { isLoading, logout, registerWithEmail, user } = useAuth();
-  const [showCreateAccount, setShowCreateAccount] = useState(false);
-  const [registerForm, setRegisterForm] = useState({
+  const { completeProfile, isLoading, loginWithEmail, logout, registerWithEmail, user } = useAuth();
+  const [authMode, setAuthMode] = useState<"login" | "signup" | "complete" | null>(null);
+  const [authForm, setAuthForm] = useState({
     name: "",
     email: "",
     password: "",
     age: "",
     birthMonth: "",
   });
-  const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
-  const [registerMessage, setRegisterMessage] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [authErrors, setAuthErrors] = useState<Record<string, string>>({});
+  const [authMessage, setAuthMessage] = useState("");
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("auth") === "complete") setAuthMode("complete");
+  }, []);
 
   const goToChat = () => setLocation("/chat-start");
-  const startGoogleLogin = () => {
-    window.location.href = "/api/auth/google/start";
+  const startGoogleLogin = (mode: "login" | "signup") => {
+    window.location.href = `/api/auth/google/start?mode=${mode}`;
   };
 
   const scrollToSection = (id: string) => {
@@ -122,44 +127,52 @@ export default function Welcome() {
     alert(`Conteúdo em breve: ${title}`);
   };
 
-  const updateRegisterForm = (field: keyof typeof registerForm, value: string) => {
-    setRegisterForm((current) => ({ ...current, [field]: value }));
-    setRegisterErrors((current) => ({ ...current, [field]: "" }));
+  const updateAuthForm = (field: keyof typeof authForm, value: string) => {
+    setAuthForm((current) => ({ ...current, [field]: value }));
+    setAuthErrors((current) => ({ ...current, [field]: "" }));
   };
 
-  const validateRegisterForm = () => {
+  const validateAuthForm = () => {
     const errors: Record<string, string> = {};
-    const age = Number(registerForm.age);
+    const age = Number(authForm.age);
+    const isSignup = authMode === "signup";
+    const isComplete = authMode === "complete";
 
-    if (!registerForm.name.trim()) errors.name = "Informe seu nome.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerForm.email.trim())) errors.email = "Informe um email válido.";
-    if (registerForm.password.length < 6) errors.password = "A senha precisa ter pelo menos 6 caracteres.";
-    if (!registerForm.age.trim()) errors.age = "Informe sua idade.";
+    if (isSignup && !authForm.name.trim()) errors.name = "Informe seu nome.";
+    if (!isComplete && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authForm.email.trim())) errors.email = "Informe um email válido.";
+    if (!isComplete && authForm.password.length < 6) errors.password = "A senha precisa ter pelo menos 6 caracteres.";
+    if ((isSignup || isComplete) && !authForm.age.trim()) errors.age = "Informe sua idade.";
     else if (!Number.isFinite(age) || age < 13) errors.age = "A idade mínima é 13 anos.";
-    if (!registerForm.birthMonth) errors.birthMonth = "Escolha o mês de nascimento.";
+    if ((isSignup || isComplete) && !authForm.birthMonth) errors.birthMonth = "Escolha o mês de nascimento.";
 
     return errors;
   };
 
-  const handleCreateAccount = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAuthSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setRegisterMessage("");
+    if (!authMode) return;
+    setAuthMessage("");
 
-    const errors = validateRegisterForm();
-    setRegisterErrors(errors);
+    const errors = validateAuthForm();
+    setAuthErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    setIsRegistering(true);
-    const result = await registerWithEmail(registerForm);
-    setIsRegistering(false);
+    setIsSubmittingAuth(true);
+    const result =
+      authMode === "login"
+        ? await loginWithEmail({ email: authForm.email, password: authForm.password })
+        : authMode === "signup"
+          ? await registerWithEmail(authForm)
+          : await completeProfile({ age: authForm.age, birthMonth: authForm.birthMonth });
+    setIsSubmittingAuth(false);
 
     if (!result.ok) {
-      setRegisterErrors(result.errors || {});
-      setRegisterMessage(result.error || "Não foi possível criar sua conta agora.");
+      setAuthErrors(result.errors || {});
+      setAuthMessage(result.error || "Não foi possível continuar agora.");
       return;
     }
 
-    setShowCreateAccount(false);
+    setAuthMode(null);
     setLocation("/espaco");
   };
 
@@ -239,16 +252,16 @@ export default function Welcome() {
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={startGoogleLogin}
+                  onClick={() => setAuthMode("login")}
                   disabled={isLoading}
                   className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur transition-smooth hover:bg-white/10 disabled:opacity-60"
                   type="button"
                 >
                   <UserRound className="h-4 w-4 text-[#f4a5d7]" />
-                  Entrar com Google
+                  Entrar
                 </button>
                 <button
-                  onClick={() => setShowCreateAccount(true)}
+                  onClick={() => setAuthMode("signup")}
                   className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#101735] transition-smooth hover:bg-white/90"
                   type="button"
                 >
@@ -500,18 +513,24 @@ export default function Welcome() {
         </div>
       </footer>
 
-      {showCreateAccount && (
+      {authMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8">
           <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0b1028] p-6 text-white shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Criar conta</h2>
+                <h2 className="text-2xl font-bold">
+                  {authMode === "login" ? "Entrar" : authMode === "signup" ? "Criar conta" : "Completar meu espaço"}
+                </h2>
                 <p className="mt-2 text-sm leading-6 text-white/66">
-                  Crie seu espaço com calma. Você poderá voltar aqui quando precisar respirar um pouco.
+                  {authMode === "complete"
+                    ? "Só precisamos de duas informações para deixar seu espaço mais acolhedor."
+                    : authMode === "signup"
+                      ? "Crie seu espaço com calma. Você poderá voltar aqui quando precisar respirar um pouco."
+                      : "Entre no seu espaço para continuar com calma."}
                 </p>
               </div>
               <button
-                onClick={() => setShowCreateAccount(false)}
+                onClick={() => setAuthMode(null)}
                 className="rounded-full border border-white/10 p-2 text-white/70 transition-smooth hover:bg-white/10 hover:text-white"
                 type="button"
               >
@@ -519,61 +538,86 @@ export default function Welcome() {
               </button>
             </div>
 
-            <form className="mt-6 space-y-4" onSubmit={handleCreateAccount}>
-              <label className="block">
-                <span className="text-sm font-semibold text-white/78">Nome</span>
-                <input
-                  value={registerForm.name}
-                  onChange={(event) => updateRegisterForm("name", event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
-                  placeholder="Como podemos te chamar?"
-                />
-                {registerErrors.name ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.name}</p> : null}
-              </label>
+            {authMode !== "complete" ? (
+              <>
+                <button
+                  onClick={() => startGoogleLogin(authMode)}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 font-bold text-[#101735] transition-smooth hover:bg-white/90"
+                  type="button"
+                >
+                  <UserRound className="h-5 w-5" />
+                  {authMode === "login" ? "Entrar com Google" : "Criar com Google"}
+                </button>
+                <div className="my-5 flex items-center gap-3 text-sm text-white/45">
+                  <span className="h-px flex-1 bg-white/10" />
+                  ou
+                  <span className="h-px flex-1 bg-white/10" />
+                </div>
+              </>
+            ) : null}
 
-              <label className="block">
-                <span className="text-sm font-semibold text-white/78">Email</span>
-                <input
-                  value={registerForm.email}
-                  onChange={(event) => updateRegisterForm("email", event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
-                  placeholder="voce@email.com"
-                  type="email"
-                />
-                {registerErrors.email ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.email}</p> : null}
-              </label>
+            <form className="space-y-4" onSubmit={handleAuthSubmit}>
+              {authMode === "signup" ? (
+                <label className="block">
+                  <span className="text-sm font-semibold text-white/78">Nome</span>
+                  <input
+                    value={authForm.name}
+                    onChange={(event) => updateAuthForm("name", event.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                    placeholder="Como podemos te chamar?"
+                  />
+                  {authErrors.name ? <p className="mt-1 text-xs text-[#ffb3ce]">{authErrors.name}</p> : null}
+                </label>
+              ) : null}
 
-              <label className="block">
-                <span className="text-sm font-semibold text-white/78">Senha</span>
-                <input
-                  value={registerForm.password}
-                  onChange={(event) => updateRegisterForm("password", event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
-                  placeholder="Mínimo 6 caracteres"
-                  type="password"
-                />
-                {registerErrors.password ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.password}</p> : null}
-              </label>
+              {authMode !== "complete" ? (
+                <>
+                  <label className="block">
+                    <span className="text-sm font-semibold text-white/78">Email</span>
+                    <input
+                      value={authForm.email}
+                      onChange={(event) => updateAuthForm("email", event.target.value)}
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                      placeholder="voce@email.com"
+                      type="email"
+                    />
+                    {authErrors.email ? <p className="mt-1 text-xs text-[#ffb3ce]">{authErrors.email}</p> : null}
+                  </label>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-sm font-semibold text-white/78">Senha</span>
+                    <input
+                      value={authForm.password}
+                      onChange={(event) => updateAuthForm("password", event.target.value)}
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                      placeholder="Mínimo 6 caracteres"
+                      type="password"
+                    />
+                    {authErrors.password ? <p className="mt-1 text-xs text-[#ffb3ce]">{authErrors.password}</p> : null}
+                  </label>
+                </>
+              ) : null}
+
+              {authMode !== "login" ? (
+                <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-sm font-semibold text-white/78">Idade</span>
                   <input
-                    value={registerForm.age}
-                    onChange={(event) => updateRegisterForm("age", event.target.value)}
+                    value={authForm.age}
+                    onChange={(event) => updateAuthForm("age", event.target.value)}
                     className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
                     min={13}
                     placeholder="13+"
                     type="number"
                   />
-                  {registerErrors.age ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.age}</p> : null}
+                  {authErrors.age ? <p className="mt-1 text-xs text-[#ffb3ce]">{authErrors.age}</p> : null}
                 </label>
 
                 <label className="block">
                   <span className="text-sm font-semibold text-white/78">Mês de nascimento</span>
                   <select
-                    value={registerForm.birthMonth}
-                    onChange={(event) => updateRegisterForm("birthMonth", event.target.value)}
+                    value={authForm.birthMonth}
+                    onChange={(event) => updateAuthForm("birthMonth", event.target.value)}
                     className="mt-2 w-full rounded-2xl border border-white/10 bg-[#101735] px-4 py-3 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60"
                   >
                     <option value="">Escolha</option>
@@ -583,22 +627,45 @@ export default function Welcome() {
                       </option>
                     ))}
                   </select>
-                  {registerErrors.birthMonth ? (
-                    <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.birthMonth}</p>
+                  {authErrors.birthMonth ? (
+                    <p className="mt-1 text-xs text-[#ffb3ce]">{authErrors.birthMonth}</p>
                   ) : null}
                 </label>
               </div>
+              ) : null}
 
-              {registerMessage ? <p className="text-sm text-[#ffb3ce]">{registerMessage}</p> : null}
+              {authMessage ? <p className="text-sm text-[#ffb3ce]">{authMessage}</p> : null}
 
               <Button
                 className="h-auto w-full rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-6 py-4 text-base font-bold text-white"
-                disabled={isRegistering}
+                disabled={isSubmittingAuth}
                 type="submit"
               >
-                {isRegistering ? "Criando..." : "Criar conta"}
+                {isSubmittingAuth
+                  ? "Continuando..."
+                  : authMode === "login"
+                    ? "Entrar"
+                    : authMode === "signup"
+                      ? "Criar conta"
+                      : "Entrar no meu espaço"}
               </Button>
             </form>
+            {authMode !== "complete" ? (
+              <p className="mt-5 text-center text-sm text-white/62">
+                {authMode === "login" ? "Não possui conta? " : "Já possui conta? "}
+                <button
+                  onClick={() => {
+                    setAuthErrors({});
+                    setAuthMessage("");
+                    setAuthMode(authMode === "login" ? "signup" : "login");
+                  }}
+                  className="font-bold text-[#d7b8ff] hover:text-white"
+                  type="button"
+                >
+                  {authMode === "login" ? "Criar conta" : "Entrar"}
+                </button>
+              </p>
+            ) : null}
           </div>
         </div>
       )}
