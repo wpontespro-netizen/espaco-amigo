@@ -114,6 +114,12 @@ export default function Welcome() {
     if (params.get("auth") === "complete") setAuthMode("complete");
   }, []);
 
+  useEffect(() => {
+    if (authMode === "complete" && user?.age && user.birthMonth) {
+      setLocation("/espaco");
+    }
+  }, [authMode, setLocation, user]);
+
   const goToChat = () => setLocation("/chat-start");
   const startGoogleLogin = (mode: "login" | "signup") => {
     window.location.href = `/api/auth/google/start?mode=${mode}`;

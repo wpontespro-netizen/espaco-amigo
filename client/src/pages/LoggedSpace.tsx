@@ -11,6 +11,7 @@ import {
   Music,
   Phone,
   Play,
+  Settings,
   Shield,
   Sparkles,
   Star,
@@ -67,6 +68,21 @@ const todayPhrases = [
 
 const breathingSteps = ["Inspire devagar", "Segure por um instante", "Solte o ar com calma"];
 
+const birthMonths = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
 const helpPhones = [
   { name: "CVV — 188", text: "Apoio emocional e prevenção do suicídio", time: "24h" },
   { name: "SAMU — 192", text: "Emergência médica", time: "24h" },
@@ -94,11 +110,14 @@ const navItems = [
 
 export default function LoggedSpace() {
   const [, setLocation] = useLocation();
-  const { isLoading, logout, user } = useAuth();
+  const { isLoading, logout, updateProfile, user } = useAuth();
   const [selectedMood, setSelectedMood] = useState("Ansiedade");
   const [activeVideo, setActiveVideo] = useState<(typeof videos)[number] | null>(null);
   const [activeSupport, setActiveSupport] = useState<"phrases" | "breathe" | null>(null);
   const [phraseIndex, setPhraseIndex] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", age: "", birthMonth: "" });
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
 
   const goToChat = () => setLocation("/chat-start");
   const scrollToSection = (id: string) => {
@@ -141,6 +160,24 @@ export default function LoggedSpace() {
     return `mailto:wpontes.pro@gmail.com?subject=${encodeURIComponent(
       "Contato pelo Espaço Amigo",
     )}&body=${encodeURIComponent(body)}`;
+  };
+  const openProfile = () => {
+    setProfileForm({
+      name: user?.name || "",
+      age: user?.age ? String(user.age) : "",
+      birthMonth: user?.birthMonth || "",
+    });
+    setProfileErrors({});
+    setShowProfile(true);
+  };
+  const saveProfile = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = await updateProfile(profileForm);
+    if (!result.ok) {
+      setProfileErrors(result.errors || { form: result.error || "Não foi possível salvar agora." });
+      return;
+    }
+    setShowProfile(false);
   };
 
   if (isLoading) {
@@ -217,6 +254,14 @@ export default function LoggedSpace() {
                     <UserRound className="h-5 w-5" />
                   </div>
                 )}
+                <button
+                  onClick={openProfile}
+                  className="flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/78 transition-smooth hover:bg-white/10"
+                  type="button"
+                >
+                  <Settings className="h-4 w-4" />
+                  Meu perfil
+                </button>
                 <button
                   onClick={() => void logout().then(() => setLocation("/"))}
                   className="flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/78 transition-smooth hover:bg-white/10"
@@ -506,6 +551,111 @@ export default function LoggedSpace() {
             >
               Fechar
             </button>
+          </div>
+        </div>
+      )}
+      {showProfile && user && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8">
+          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0b1028] p-6 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold">Meu perfil</h2>
+                <p className="mt-2 text-sm leading-6 text-white/66">
+                  Essas informações ajudam a deixar seu espaço mais acolhedor.
+                </p>
+              </div>
+              {user.picture ? (
+                <img src={user.picture} alt={user.name} className="h-12 w-12 rounded-full border border-white/15" />
+              ) : null}
+            </div>
+
+            <form className="mt-6 space-y-4" onSubmit={saveProfile}>
+              <label className="block">
+                <span className="text-sm font-semibold text-white/78">Nome</span>
+                <input
+                  value={profileForm.name}
+                  onChange={(event) => {
+                    setProfileForm((current) => ({ ...current, name: event.target.value }));
+                    setProfileErrors((current) => ({ ...current, name: "" }));
+                  }}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                />
+                {profileErrors.name ? <p className="mt-1 text-xs text-[#ffb3ce]">{profileErrors.name}</p> : null}
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-semibold text-white/78">Email</span>
+                <input
+                  value={user.email}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white/58 outline-none"
+                  readOnly
+                />
+              </label>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-semibold text-white/78">Idade</span>
+                  <input
+                    value={profileForm.age}
+                    onChange={(event) => {
+                      setProfileForm((current) => ({ ...current, age: event.target.value }));
+                      setProfileErrors((current) => ({ ...current, age: "" }));
+                    }}
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60"
+                    min={13}
+                    type="number"
+                  />
+                  {profileErrors.age ? <p className="mt-1 text-xs text-[#ffb3ce]">{profileErrors.age}</p> : null}
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-semibold text-white/78">Mês nascimento</span>
+                  <select
+                    value={profileForm.birthMonth}
+                    onChange={(event) => {
+                      setProfileForm((current) => ({ ...current, birthMonth: event.target.value }));
+                      setProfileErrors((current) => ({ ...current, birthMonth: "" }));
+                    }}
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-[#101735] px-4 py-3 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60"
+                  >
+                    <option value="">Escolha</option>
+                    {birthMonths.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  {profileErrors.birthMonth ? (
+                    <p className="mt-1 text-xs text-[#ffb3ce]">{profileErrors.birthMonth}</p>
+                  ) : null}
+                </label>
+              </div>
+
+              <label className="block">
+                <span className="text-sm font-semibold text-white/78">Tipo de conta</span>
+                <input
+                  value={user.provider === "google" ? "Google" : "Email e senha"}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-white/58 outline-none"
+                  readOnly
+                />
+              </label>
+              {profileErrors.form ? <p className="text-sm text-[#ffb3ce]">{profileErrors.form}</p> : null}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button
+                  className="h-auto rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-5 py-4 font-bold text-white"
+                  type="submit"
+                >
+                  Salvar alterações
+                </Button>
+                <button
+                  onClick={() => setShowProfile(false)}
+                  className="rounded-2xl border border-white/10 px-5 py-4 font-semibold text-white/78 transition-smooth hover:bg-white/10"
+                  type="button"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
