@@ -7,6 +7,7 @@ import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 import {
   completeGoogleAuth,
+  createEmailAccount,
   createGoogleAuthStart,
   createLogoutCookie,
   getSessionUser,
@@ -285,7 +286,8 @@ function vitePluginAuthApi(): Plugin {
             state: callbackUrl.searchParams.get("state") || undefined,
           })
             .then((result) => {
-              res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
+              const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+              res.setHeader("Set-Cookie", cookies.map(serializeCookie));
               res.writeHead(302, { Location: "/espaco" });
               res.end();
             })
@@ -300,6 +302,39 @@ function vitePluginAuthApi(): Plugin {
         if (req.method === "GET" && pathname === "/session") {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ user: getSessionUser(req.headers.cookie) }));
+          return;
+        }
+
+        if (req.method === "POST" && pathname === "/register") {
+          let body = "";
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          req.on("end", () => {
+            try {
+              const payload = body ? JSON.parse(body) : {};
+              const result = createEmailAccount(baseUrl, payload);
+              if (!result.ok) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(result));
+                return;
+              }
+              if (!("cookies" in result)) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ ok: false, error: "Dados inválidos." }));
+                return;
+              }
+
+              res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: true, user: result.user }));
+            } catch (error) {
+              console.error("Email account creation dev error:", error);
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: false, error: "Não foi possível criar sua conta agora." }));
+            }
+          });
           return;
         }
 

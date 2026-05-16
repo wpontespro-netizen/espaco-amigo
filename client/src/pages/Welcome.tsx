@@ -14,10 +14,13 @@ import {
   ShieldCheck,
   Sparkles,
   Sprout,
+  UserPlus,
   UserRound,
   Users,
   Wind,
+  X,
 } from "lucide-react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 
 const contentCards = [
@@ -76,9 +79,35 @@ const professionals = [
   },
 ];
 
+const birthMonths = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
 export default function Welcome() {
   const [, setLocation] = useLocation();
-  const { isLoading, logout, user } = useAuth();
+  const { isLoading, logout, registerWithEmail, user } = useAuth();
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [registerForm, setRegisterForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    age: "",
+    birthMonth: "",
+  });
+  const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
+  const [registerMessage, setRegisterMessage] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const goToChat = () => setLocation("/chat-start");
   const startGoogleLogin = () => {
@@ -91,6 +120,47 @@ export default function Welcome() {
 
   const openContentPlaceholder = (title: string) => {
     alert(`Conteúdo em breve: ${title}`);
+  };
+
+  const updateRegisterForm = (field: keyof typeof registerForm, value: string) => {
+    setRegisterForm((current) => ({ ...current, [field]: value }));
+    setRegisterErrors((current) => ({ ...current, [field]: "" }));
+  };
+
+  const validateRegisterForm = () => {
+    const errors: Record<string, string> = {};
+    const age = Number(registerForm.age);
+
+    if (!registerForm.name.trim()) errors.name = "Informe seu nome.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerForm.email.trim())) errors.email = "Informe um email válido.";
+    if (registerForm.password.length < 6) errors.password = "A senha precisa ter pelo menos 6 caracteres.";
+    if (!registerForm.age.trim()) errors.age = "Informe sua idade.";
+    else if (!Number.isFinite(age) || age < 13) errors.age = "A idade mínima é 13 anos.";
+    if (!registerForm.birthMonth) errors.birthMonth = "Escolha o mês de nascimento.";
+
+    return errors;
+  };
+
+  const handleCreateAccount = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setRegisterMessage("");
+
+    const errors = validateRegisterForm();
+    setRegisterErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setIsRegistering(true);
+    const result = await registerWithEmail(registerForm);
+    setIsRegistering(false);
+
+    if (!result.ok) {
+      setRegisterErrors(result.errors || {});
+      setRegisterMessage(result.error || "Não foi possível criar sua conta agora.");
+      return;
+    }
+
+    setShowCreateAccount(false);
+    setLocation("/espaco");
   };
 
   return (
@@ -167,15 +237,25 @@ export default function Welcome() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={startGoogleLogin}
-                disabled={isLoading}
-                className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur transition-smooth hover:bg-white/10 disabled:opacity-60"
-                type="button"
-              >
-                <UserRound className="h-4 w-4 text-[#f4a5d7]" />
-                Entrar
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={startGoogleLogin}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur transition-smooth hover:bg-white/10 disabled:opacity-60"
+                  type="button"
+                >
+                  <UserRound className="h-4 w-4 text-[#f4a5d7]" />
+                  Entrar com Google
+                </button>
+                <button
+                  onClick={() => setShowCreateAccount(true)}
+                  className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#101735] transition-smooth hover:bg-white/90"
+                  type="button"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Criar conta
+                </button>
+              </div>
             )}
           </header>
 
@@ -419,6 +499,109 @@ export default function Welcome() {
           </div>
         </div>
       </footer>
+
+      {showCreateAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-8">
+          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0b1028] p-6 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold">Criar conta</h2>
+                <p className="mt-2 text-sm leading-6 text-white/66">
+                  Crie seu espaço com calma. Você poderá voltar aqui quando precisar respirar um pouco.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreateAccount(false)}
+                className="rounded-full border border-white/10 p-2 text-white/70 transition-smooth hover:bg-white/10 hover:text-white"
+                type="button"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form className="mt-6 space-y-4" onSubmit={handleCreateAccount}>
+              <label className="block">
+                <span className="text-sm font-semibold text-white/78">Nome</span>
+                <input
+                  value={registerForm.name}
+                  onChange={(event) => updateRegisterForm("name", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                  placeholder="Como podemos te chamar?"
+                />
+                {registerErrors.name ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.name}</p> : null}
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-semibold text-white/78">Email</span>
+                <input
+                  value={registerForm.email}
+                  onChange={(event) => updateRegisterForm("email", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                  placeholder="voce@email.com"
+                  type="email"
+                />
+                {registerErrors.email ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.email}</p> : null}
+              </label>
+
+              <label className="block">
+                <span className="text-sm font-semibold text-white/78">Senha</span>
+                <input
+                  value={registerForm.password}
+                  onChange={(event) => updateRegisterForm("password", event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                  placeholder="Mínimo 6 caracteres"
+                  type="password"
+                />
+                {registerErrors.password ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.password}</p> : null}
+              </label>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-semibold text-white/78">Idade</span>
+                  <input
+                    value={registerForm.age}
+                    onChange={(event) => updateRegisterForm("age", event.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth placeholder:text-white/35 focus:border-[#d7b8ff]/60"
+                    min={13}
+                    placeholder="13+"
+                    type="number"
+                  />
+                  {registerErrors.age ? <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.age}</p> : null}
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-semibold text-white/78">Mês de nascimento</span>
+                  <select
+                    value={registerForm.birthMonth}
+                    onChange={(event) => updateRegisterForm("birthMonth", event.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-[#101735] px-4 py-3 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60"
+                  >
+                    <option value="">Escolha</option>
+                    {birthMonths.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  {registerErrors.birthMonth ? (
+                    <p className="mt-1 text-xs text-[#ffb3ce]">{registerErrors.birthMonth}</p>
+                  ) : null}
+                </label>
+              </div>
+
+              {registerMessage ? <p className="text-sm text-[#ffb3ce]">{registerMessage}</p> : null}
+
+              <Button
+                className="h-auto w-full rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-6 py-4 text-base font-bold text-white"
+                disabled={isRegistering}
+                type="submit"
+              >
+                {isRegistering ? "Criando..." : "Criar conta"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

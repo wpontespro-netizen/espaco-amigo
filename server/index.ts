@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import {
   completeGoogleAuth,
+  createEmailAccount,
   createGoogleAuthStart,
   createLogoutCookie,
   getSessionUser,
@@ -42,7 +43,8 @@ async function startServer() {
   app.get("/api/auth/google/start", (req, res) => {
     try {
       const result = createGoogleAuthStart(getRequestBaseUrl(req));
-      res.setHeader("Set-Cookie", result.cookies.map(serializeCookie));
+      const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+      res.setHeader("Set-Cookie", cookies.map(serializeCookie));
       res.redirect(result.redirectUrl);
     } catch (error) {
       console.error("Google auth start error:", error);
@@ -68,6 +70,27 @@ async function startServer() {
 
   app.get("/api/auth/session", (req, res) => {
     res.json({ user: getSessionUser(req.headers.cookie) });
+  });
+
+  app.post("/api/auth/register", (req, res) => {
+    try {
+      const result = createEmailAccount(getRequestBaseUrl(req), req.body);
+      if (!result.ok) {
+        res.status(400).json(result);
+        return;
+      }
+      if (!("cookies" in result)) {
+        res.status(400).json({ ok: false, error: "Dados inválidos." });
+        return;
+      }
+
+      const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+      res.setHeader("Set-Cookie", cookies.map(serializeCookie));
+      res.json({ ok: true, user: result.user });
+    } catch (error) {
+      console.error("Email account creation error:", error);
+      res.status(500).json({ ok: false, error: "Não foi possível criar sua conta agora." });
+    }
   });
 
   app.post("/api/auth/logout", (req, res) => {

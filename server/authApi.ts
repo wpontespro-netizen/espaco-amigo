@@ -5,6 +5,8 @@ export interface AuthUser {
   name: string;
   email: string;
   picture?: string;
+  age?: number;
+  birthMonth?: string;
 }
 
 export interface AuthCookie {
@@ -25,6 +27,20 @@ const SESSION_COOKIE = "ea_session";
 const OAUTH_STATE_COOKIE = "ea_oauth_state";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 const OAUTH_STATE_MAX_AGE = 60 * 10;
+const BIRTH_MONTHS = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
 
 export function createGoogleAuthStart(baseUrl: string) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -148,6 +164,58 @@ export async function completeGoogleAuth({
   };
 }
 
+export function createEmailAccount(baseUrl: string, payload: unknown) {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error("Auth is not configured. Set AUTH_SECRET.");
+  }
+
+  const data = (payload || {}) as {
+    name?: string;
+    email?: string;
+    password?: string;
+    age?: number | string;
+    birthMonth?: string;
+  };
+  const name = String(data.name || "").trim();
+  const email = String(data.email || "").trim().toLowerCase();
+  const password = String(data.password || "");
+  const age = Number(data.age);
+  const birthMonth = String(data.birthMonth || "").trim();
+
+  const errors: Record<string, string> = {};
+  if (!name) errors.name = "Informe seu nome.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Informe um email válido.";
+  if (password.length < 6) errors.password = "A senha precisa ter pelo menos 6 caracteres.";
+  if (!Number.isFinite(age)) errors.age = "Informe sua idade.";
+  else if (age < 13) errors.age = "A idade mínima é 13 anos.";
+  if (!BIRTH_MONTHS.includes(birthMonth)) errors.birthMonth = "Escolha o mês de nascimento.";
+
+  if (Object.keys(errors).length > 0) {
+    return { ok: false, errors };
+  }
+
+  const user: AuthUser = {
+    id: `email:${crypto.createHash("sha256").update(email).digest("hex").slice(0, 24)}`,
+    name,
+    email,
+    age,
+    birthMonth,
+  };
+
+  return {
+    ok: true,
+    user,
+    cookies: [
+      {
+        name: SESSION_COOKIE,
+        value: signValue(JSON.stringify(user), secret),
+        options: baseCookieOptions(SESSION_MAX_AGE, baseUrl),
+      },
+    ],
+  };
+}
+
 export function getSessionUser(cookieHeader?: string): AuthUser | null {
   const secret = process.env.AUTH_SECRET;
   if (!secret) return null;
@@ -165,6 +233,8 @@ export function getSessionUser(cookieHeader?: string): AuthUser | null {
       name: parsed.name,
       email: parsed.email,
       picture: parsed.picture,
+      age: parsed.age,
+      birthMonth: parsed.birthMonth,
     };
   } catch {
     return null;
