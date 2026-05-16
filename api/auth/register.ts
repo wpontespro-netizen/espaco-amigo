@@ -12,13 +12,13 @@ interface ApiResponse {
   json(body: unknown): void;
 }
 
-export default function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ ok: false, error: "Método não permitido." });
   }
 
   try {
-    const result = createEmailAccount(getRequestBaseUrl(req), req.body, firstHeader(req.headers.cookie));
+    const result = await createEmailAccount(getRequestBaseUrl(req), req.body);
     if (!result.ok) {
       return res.status(400).json(result);
     }

@@ -1,4 +1,4 @@
-import { completeUserProfile, serializeCookie } from "../../server/authApi.js";
+import { serializeCookie, updateUserProfile } from "../../server/authApi.js";
 
 interface ApiRequest {
   body?: unknown;
@@ -16,14 +16,14 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Método não permitido." });
 
   try {
-    const result = await completeUserProfile(getRequestBaseUrl(req), req.body, firstHeader(req.headers.cookie));
+    const result = await updateUserProfile(getRequestBaseUrl(req), req.body, firstHeader(req.headers.cookie));
     if (!result.ok) return res.status(400).json(result);
     const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
     res.setHeader("Set-Cookie", cookies.map(serializeCookie));
     return res.status(200).json({ ok: true, user: result.user });
   } catch (error) {
-    console.error("Complete profile serverless error:", error);
-    return res.status(500).json({ ok: false, error: "Não foi possível completar seu espaço agora." });
+    console.error("Update profile serverless error:", error);
+    return res.status(500).json({ ok: false, error: "Não foi possível salvar seu perfil agora." });
   }
 }
 

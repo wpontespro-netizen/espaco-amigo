@@ -12,11 +12,11 @@ interface ApiResponse {
   json(body: unknown): void;
 }
 
-export default function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, error: "Método não permitido." });
 
   try {
-    const result = loginEmailAccount(getRequestBaseUrl(req), req.body, firstHeader(req.headers.cookie));
+    const result = await loginEmailAccount(getRequestBaseUrl(req), req.body);
     if (!result.ok) return res.status(400).json(result);
     const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
     res.setHeader("Set-Cookie", cookies.map(serializeCookie));

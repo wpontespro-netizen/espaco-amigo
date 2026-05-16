@@ -94,24 +94,26 @@ const birthMonths = [
   "Dezembro",
 ];
 
+const emptyAuthForm = {
+  name: "",
+  email: "",
+  password: "",
+  age: "",
+  birthMonth: "",
+};
+
 export default function Welcome() {
   const [, setLocation] = useLocation();
   const { completeProfile, isLoading, loginWithEmail, logout, registerWithEmail, user } = useAuth();
   const [authMode, setAuthMode] = useState<"login" | "signup" | "complete" | null>(null);
-  const [authForm, setAuthForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    age: "",
-    birthMonth: "",
-  });
+  const [authForm, setAuthForm] = useState(emptyAuthForm);
   const [authErrors, setAuthErrors] = useState<Record<string, string>>({});
   const [authMessage, setAuthMessage] = useState("");
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("auth") === "complete") setAuthMode("complete");
+    if (params.get("auth") === "complete") openAuthModal("complete");
   }, []);
 
   useEffect(() => {
@@ -121,6 +123,13 @@ export default function Welcome() {
   }, [authMode, setLocation, user]);
 
   const goToChat = () => setLocation("/chat-start");
+  const openAuthModal = (mode: "login" | "signup" | "complete") => {
+    setAuthForm(emptyAuthForm);
+    setAuthErrors({});
+    setAuthMessage("");
+    setAuthMode(mode);
+  };
+
   const startGoogleLogin = (mode: "login" | "signup") => {
     window.location.href = `/api/auth/google/start?mode=${mode}`;
   };
@@ -258,7 +267,7 @@ export default function Welcome() {
             ) : (
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setAuthMode("login")}
+                  onClick={() => openAuthModal("login")}
                   disabled={isLoading}
                   className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 backdrop-blur transition-smooth hover:bg-white/10 disabled:opacity-60"
                   type="button"
@@ -267,7 +276,7 @@ export default function Welcome() {
                   Entrar
                 </button>
                 <button
-                  onClick={() => setAuthMode("signup")}
+                  onClick={() => openAuthModal("signup")}
                   className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#101735] transition-smooth hover:bg-white/90"
                   type="button"
                 >
@@ -661,9 +670,7 @@ export default function Welcome() {
                 {authMode === "login" ? "Não possui conta? " : "Já possui conta? "}
                 <button
                   onClick={() => {
-                    setAuthErrors({});
-                    setAuthMessage("");
-                    setAuthMode(authMode === "login" ? "signup" : "login");
+                    openAuthModal(authMode === "login" ? "signup" : "login");
                   }}
                   className="font-bold text-[#d7b8ff] hover:text-white"
                   type="button"

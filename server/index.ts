@@ -11,6 +11,7 @@ import {
   getSessionUser,
   loginEmailAccount,
   serializeCookie,
+  updateUserProfile,
 } from "./authApi";
 import { handleChatRequest, loadLocalEnv } from "./chatApi";
 
@@ -74,9 +75,9 @@ async function startServer() {
     res.json({ user: getSessionUser(req.headers.cookie) });
   });
 
-  app.post("/api/auth/register", (req, res) => {
+  app.post("/api/auth/register", async (req, res) => {
     try {
-      const result = createEmailAccount(getRequestBaseUrl(req), req.body, req.headers.cookie);
+      const result = await createEmailAccount(getRequestBaseUrl(req), req.body);
       if (!result.ok) {
         res.status(400).json(result);
         return;
@@ -95,9 +96,9 @@ async function startServer() {
     }
   });
 
-  app.post("/api/auth/login", (req, res) => {
+  app.post("/api/auth/login", async (req, res) => {
     try {
-      const result = loginEmailAccount(getRequestBaseUrl(req), req.body, req.headers.cookie);
+      const result = await loginEmailAccount(getRequestBaseUrl(req), req.body);
       if (!result.ok) {
         res.status(400).json(result);
         return;
@@ -111,9 +112,9 @@ async function startServer() {
     }
   });
 
-  app.post("/api/auth/complete-profile", (req, res) => {
+  app.post("/api/auth/complete-profile", async (req, res) => {
     try {
-      const result = completeUserProfile(getRequestBaseUrl(req), req.body, req.headers.cookie);
+      const result = await completeUserProfile(getRequestBaseUrl(req), req.body, req.headers.cookie);
       if (!result.ok) {
         res.status(400).json(result);
         return;
@@ -124,6 +125,22 @@ async function startServer() {
     } catch (error) {
       console.error("Complete profile error:", error);
       res.status(500).json({ ok: false, error: "Não foi possível completar seu espaço agora." });
+    }
+  });
+
+  app.post("/api/auth/update-profile", async (req, res) => {
+    try {
+      const result = await updateUserProfile(getRequestBaseUrl(req), req.body, req.headers.cookie);
+      if (!result.ok) {
+        res.status(400).json(result);
+        return;
+      }
+      const cookies = (result as { cookies: Parameters<typeof serializeCookie>[0][] }).cookies;
+      res.setHeader("Set-Cookie", cookies.map(serializeCookie));
+      res.json({ ok: true, user: result.user });
+    } catch (error) {
+      console.error("Update profile error:", error);
+      res.status(500).json({ ok: false, error: "Não foi possível salvar seu perfil agora." });
     }
   });
 

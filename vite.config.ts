@@ -14,6 +14,7 @@ import {
   getSessionUser,
   loginEmailAccount,
   serializeCookie,
+  updateUserProfile,
 } from "./server/authApi";
 import { handleChatRequest, loadLocalEnv } from "./server/chatApi";
 
@@ -314,10 +315,10 @@ function vitePluginAuthApi(): Plugin {
             body += chunk.toString();
           });
 
-          req.on("end", () => {
+          req.on("end", async () => {
             try {
               const payload = body ? JSON.parse(body) : {};
-              const result = createEmailAccount(baseUrl, payload, req.headers.cookie);
+              const result = await createEmailAccount(baseUrl, payload);
               if (!result.ok) {
                 res.writeHead(400, { "Content-Type": "application/json" });
                 res.end(JSON.stringify(result));
@@ -342,19 +343,21 @@ function vitePluginAuthApi(): Plugin {
           return;
         }
 
-        if (req.method === "POST" && (pathname === "/login" || pathname === "/complete-profile")) {
+        if (req.method === "POST" && (pathname === "/login" || pathname === "/complete-profile" || pathname === "/update-profile")) {
           let body = "";
           req.on("data", (chunk) => {
             body += chunk.toString();
           });
 
-          req.on("end", () => {
+          req.on("end", async () => {
             try {
               const payload = body ? JSON.parse(body) : {};
               const result =
                 pathname === "/login"
-                  ? loginEmailAccount(baseUrl, payload, req.headers.cookie)
-                  : completeUserProfile(baseUrl, payload, req.headers.cookie);
+                  ? await loginEmailAccount(baseUrl, payload)
+                  : pathname === "/complete-profile"
+                    ? await completeUserProfile(baseUrl, payload, req.headers.cookie)
+                    : await updateUserProfile(baseUrl, payload, req.headers.cookie);
               if (!result.ok) {
                 res.writeHead(400, { "Content-Type": "application/json" });
                 res.end(JSON.stringify(result));
