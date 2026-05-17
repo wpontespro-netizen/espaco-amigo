@@ -187,8 +187,8 @@ export async function loginEmailAccount(baseUrl: string, payload: unknown) {
   try {
     authResult = await supabaseAuthAnon("POST", "/token?grant_type=password", { email, password: data.password });
   } catch (error) {
-    if (isInvalidLoginError(error)) return { ok: false, error: "Email ou senha inválidos." };
-    throw error;
+    if (isSupabaseConfigError(error)) throw error;
+    return { ok: false, error: "Email ou senha inválidos." };
   }
   if (!authResult.user?.id) return { ok: false, error: "Email ou senha inválidos." };
   const profile = await getProfileByEmail(email);
@@ -349,9 +349,9 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function isInvalidLoginError(error: unknown) {
+function isSupabaseConfigError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
-  return /invalid login credentials|invalid credentials|supabase error 400/i.test(message);
+  return /supabase is not configured/i.test(message);
 }
 
 function baseCookieOptions(maxAge: number, baseUrl: string): CookieOptions {
