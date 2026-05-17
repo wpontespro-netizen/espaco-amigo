@@ -108,7 +108,7 @@ async function startServer() {
       res.json({ ok: true, user: result.user });
     } catch (error) {
       console.error("Email login error:", error);
-      res.status(500).json({ ok: false, error: "Não foi possível entrar agora." });
+      res.status(500).json({ ok: false, error: "Não foi possível entrar agora. Tente novamente." });
     }
   });
 

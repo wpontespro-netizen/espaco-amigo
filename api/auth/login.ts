@@ -23,7 +23,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(200).json({ ok: true, user: result.user });
   } catch (error) {
     console.error("Email login serverless error:", error);
-    return res.status(500).json({ ok: false, error: "Não foi possível entrar agora." });
+    return res.status(500).json({ ok: false, error: "Não foi possível entrar agora. Tente novamente." });
   }
 }
 

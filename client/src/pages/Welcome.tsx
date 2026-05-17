@@ -156,9 +156,11 @@ export default function Welcome() {
     if (isSignup && !authForm.name.trim()) errors.name = "Informe seu nome.";
     if (!isComplete && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authForm.email.trim())) errors.email = "Informe um email válido.";
     if (!isComplete && authForm.password.length < 6) errors.password = "A senha precisa ter pelo menos 6 caracteres.";
-    if ((isSignup || isComplete) && !authForm.age.trim()) errors.age = "Informe sua idade.";
-    else if (!Number.isFinite(age) || age < 13) errors.age = "A idade mínima é 13 anos.";
-    if ((isSignup || isComplete) && !authForm.birthMonth) errors.birthMonth = "Escolha o mês de nascimento.";
+    if (isSignup || isComplete) {
+      if (!authForm.age.trim()) errors.age = "Informe sua idade.";
+      else if (!Number.isFinite(age) || age < 13) errors.age = "A idade mínima é 13 anos.";
+      if (!authForm.birthMonth) errors.birthMonth = "Escolha o mês de nascimento.";
+    }
 
     return errors;
   };

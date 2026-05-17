@@ -370,7 +370,7 @@ function vitePluginAuthApi(): Plugin {
             } catch (error) {
               console.error("Auth dev endpoint error:", error);
               res.writeHead(500, { "Content-Type": "application/json" });
-              res.end(JSON.stringify({ ok: false, error: "Não foi possível continuar agora." }));
+              res.end(JSON.stringify({ ok: false, error: pathname === "/login" ? "Não foi possível entrar agora. Tente novamente." : "Não foi possível continuar agora." }));
             }
           });
           return;

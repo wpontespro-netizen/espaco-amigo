@@ -183,7 +183,13 @@ export async function loginEmailAccount(baseUrl: string, payload: unknown) {
   if (!data.password) errors.password = "Informe sua senha.";
   if (Object.keys(errors).length) return { ok: false, errors };
 
-  const authResult = await supabaseAuthAnon("POST", "/token?grant_type=password", { email, password: data.password });
+  let authResult;
+  try {
+    authResult = await supabaseAuthAnon("POST", "/token?grant_type=password", { email, password: data.password });
+  } catch (error) {
+    if (isInvalidLoginError(error)) return { ok: false, error: "Email ou senha inválidos." };
+    throw error;
+  }
   if (!authResult.user?.id) return { ok: false, error: "Email ou senha inválidos." };
   const profile = await getProfileByEmail(email);
   if (!profile || profile.provider !== "credentials") return { ok: false, error: "Conta não encontrada para email e senha." };
@@ -341,6 +347,11 @@ function normalizeEmail(email: string) {
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isInvalidLoginError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /invalid login credentials|invalid credentials|supabase error 400/i.test(message);
 }
 
 function baseCookieOptions(maxAge: number, baseUrl: string): CookieOptions {
