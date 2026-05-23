@@ -14,6 +14,7 @@ import {
   updateUserProfile,
 } from "./authApi";
 import { handleChatRequest, loadLocalEnv } from "./chatApi";
+import { createPsychologistApplication, listApprovedPsychologists } from "./psychologistApi";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,32 @@ async function startServer() {
         endReached: false,
         showProfessionals: false,
       });
+    }
+  });
+
+  app.get("/api/psychologists", async (_req, res) => {
+    try {
+      res.json({ ok: true, psychologists: await listApprovedPsychologists() });
+    } catch (error) {
+      console.error("Psychologists list error:", error);
+      res.status(500).json({ ok: false, error: "Não foi possível carregar psicólogos agora." });
+    }
+  });
+
+  app.post("/api/psychologists", async (req, res) => {
+    try {
+      const result = await createPsychologistApplication(req.body);
+      if (!result.ok) {
+        res.status(400).json(result);
+        return;
+      }
+      res.json({
+        ok: true,
+        message: "Recebemos seu cadastro. A equipe do Espaço Amigo vai avaliar suas informações com cuidado antes de liberar seu perfil para os usuários.",
+      });
+    } catch (error) {
+      console.error("Psychologist creation error:", error);
+      res.status(500).json({ ok: false, error: "Não foi possível enviar seu cadastro agora." });
     }
   });
 

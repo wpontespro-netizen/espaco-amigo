@@ -13,6 +13,7 @@ import Continuity from "./pages/Continuity";
 import Referral from "./pages/Referral";
 import Professionals from "./pages/Professionals";
 import LoggedSpace from "./pages/LoggedSpace";
+import PsychologistSignup from "./pages/PsychologistSignup";
 
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/continuity" component={Continuity} />
       <Route path="/referral" component={Referral} />
       <Route path="/professionals" component={Professionals} />
+      <Route path="/cadastro-psicologo" component={PsychologistSignup} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

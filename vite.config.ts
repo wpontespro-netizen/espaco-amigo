@@ -17,6 +17,7 @@ import {
   updateUserProfile,
 } from "./server/authApi";
 import { handleChatRequest, loadLocalEnv } from "./server/chatApi";
+import { createPsychologistApplication, listApprovedPsychologists } from "./server/psychologistApi";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -255,6 +256,59 @@ function vitePluginChatApi(): Plugin {
   };
 }
 
+function vitePluginPsychologistsApi(): Plugin {
+  return {
+    name: "espaco-amigo-psychologists-api",
+    configureServer(server: ViteDevServer) {
+      loadLocalEnv(PROJECT_ROOT);
+
+      server.middlewares.use("/api/psychologists", (req, res, next) => {
+        if (req.method === "GET") {
+          listApprovedPsychologists()
+            .then((psychologists) => {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: true, psychologists }));
+            })
+            .catch((error) => {
+              console.error("Psychologists dev list error:", error);
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: false, error: "Não foi possível carregar psicólogos agora." }));
+            });
+          return;
+        }
+
+        if (req.method === "POST") {
+          let body = "";
+          req.on("data", (chunk) => {
+            body += chunk.toString();
+          });
+
+          req.on("end", async () => {
+            try {
+              const payload = body ? JSON.parse(body) : {};
+              const result = await createPsychologistApplication(payload);
+              if (!result.ok) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(result));
+                return;
+              }
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: true }));
+            } catch (error) {
+              console.error("Psychologist dev creation error:", error);
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ ok: false, error: "Não foi possível enviar seu cadastro agora." }));
+            }
+          });
+          return;
+        }
+
+        next();
+      });
+    },
+  };
+}
+
 function vitePluginAuthApi(): Plugin {
   return {
     name: "espaco-amigo-auth-api",
@@ -398,7 +452,7 @@ function getDevBaseUrl(req: any) {
   return `${proto}://${host}`;
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy(), vitePluginChatApi(), vitePluginAuthApi()];
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy(), vitePluginChatApi(), vitePluginPsychologistsApi(), vitePluginAuthApi()];
 
 export default defineConfig({
   plugins,

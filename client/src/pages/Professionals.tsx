@@ -1,226 +1,94 @@
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Video, MapPin } from "lucide-react";
+import { buildProfessionalMailto, fallbackPsychologists, fetchApprovedPsychologists, initials, type Psychologist } from "@/lib/psychologists";
+import { ArrowLeft, Mail, MapPin, UserRound, Video } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-
-/**
- * TELA DE PROFISSIONAIS INDICADOS
- * Design: Minimalismo Acolhedor
- * - Cards simples com informações dos profissionais
- * - Tipos de atendimento (online/presencial)
- * - Botão para conversar com profissional
- */
-
-interface Professional {
-  id: number;
-  name: string;
-  specialty: string;
-  type: "online" | "presencial" | "ambos";
-  description: string;
-}
-
-const PROFESSIONALS: Professional[] = [
-  {
-    id: 1,
-    name: "Dra. Ana Silva",
-    specialty: "Ansiedade e Estresse",
-    type: "ambos",
-    description: "Especialista em terapia cognitivo-comportamental com 8 anos de experiência.",
-  },
-  {
-    id: 2,
-    name: "Dr. João Santos",
-    specialty: "Emocional e Relacionamentos",
-    type: "online",
-    description: "Psicólogo clínico focado em bem-estar emocional e desenvolvimento pessoal.",
-  },
-  {
-    id: 3,
-    name: "Dra. Marina Costa",
-    specialty: "Sobrecarga e Cansaço",
-    type: "presencial",
-    description: "Especialista em gestão de estresse e equilíbrio emocional.",
-  },
-  {
-    id: 4,
-    name: "Dr. Carlos Oliveira",
-    specialty: "Tristeza e Desânimo",
-    type: "ambos",
-    description: "Psicólogo com abordagem humanista e acolhedora.",
-  },
-];
 
 export default function Professionals() {
   const [, setLocation] = useLocation();
+  const [approvedPsychologists, setApprovedPsychologists] = useState<Psychologist[] | null>(null);
 
-  const handleContactProfessional = (professionalName: string) => {
-    alert(
-      `Em um app real, você seria conectado com ${professionalName} para uma consulta.`
-    );
-  };
+  useEffect(() => {
+    fetchApprovedPsychologists()
+      .then(setApprovedPsychologists)
+      .catch(() => setApprovedPsychologists(null));
+  }, []);
+
+  const professionals = approvedPsychologists ?? fallbackPsychologists;
 
   return (
-    <div className="mobile-screen min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
-        <button
-          onClick={() => setLocation("/espaco")}
-          className="p-2 hover:bg-gray-50 rounded-lg transition-smooth"
-        >
-          <ArrowLeft size={24} style={{ color: "oklch(0.3 0.02 65)" }} />
-        </button>
-        <h2
-          className="text-xl font-bold"
-          style={{
-            fontFamily: "'Poppins', sans-serif",
-            color: "oklch(0.3 0.02 65)",
-          }}
-        >
-          Profissionais Indicados
-        </h2>
-      </div>
-
-      {/* Conteúdo principal */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        {/* Texto introdutório */}
-        <p
-          className="text-center mb-8"
-          style={{
-            color: "oklch(0.55 0.02 65)",
-            fontFamily: "'Inter', sans-serif",
-            lineHeight: "1.6",
-            fontSize: "15px",
-          }}
-        >
-          Aqui estão alguns profissionais que podem te ajudar. Escolha com calma
-          e no seu tempo.
-        </p>
-
-        {/* Cards de profissionais */}
-        <div className="space-y-4">
-          {PROFESSIONALS.map((prof) => (
-            <div
-              key={prof.id}
-              className="p-5 rounded-2xl border-l-4 transition-smooth hover:shadow-md"
-              style={{
-                backgroundColor: "oklch(0.97 0.01 65)",
-                borderLeftColor: "oklch(0.75 0.08 160)",
-              }}
-            >
-              {/* Nome e especialidade */}
-              <h3
-                className="font-semibold mb-1"
-                style={{
-                  fontFamily: "'Poppins', sans-serif",
-                  color: "oklch(0.3 0.02 65)",
-                  fontSize: "16px",
-                }}
-              >
-                {prof.name}
-              </h3>
-              <p
-                className="text-sm mb-3"
-                style={{
-                  color: "oklch(0.75 0.08 160)",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                }}
-              >
-                {prof.specialty}
-              </p>
-
-              {/* Descrição */}
-              <p
-                className="text-sm mb-3"
-                style={{
-                  color: "oklch(0.55 0.02 65)",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: "14px",
-                  lineHeight: "1.4",
-                }}
-              >
-                {prof.description}
-              </p>
-
-              {/* Tipo de atendimento */}
-              <div className="flex gap-3 mb-4">
-                {(prof.type === "online" || prof.type === "ambos") && (
-                  <div
-                    className="flex items-center gap-2 text-xs px-3 py-1 rounded-full"
-                    style={{
-                      backgroundColor: "oklch(0.92 0.05 240)",
-                      color: "oklch(0.3 0.02 65)",
-                    }}
-                  >
-                    <Video size={14} />
-                    <span>Online</span>
-                  </div>
-                )}
-                {(prof.type === "presencial" || prof.type === "ambos") && (
-                  <div
-                    className="flex items-center gap-2 text-xs px-3 py-1 rounded-full"
-                    style={{
-                      backgroundColor: "oklch(0.92 0.05 160)",
-                      color: "oklch(0.3 0.02 65)",
-                    }}
-                  >
-                    <MapPin size={14} />
-                    <span>Presencial</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Botão de ação */}
-              <button
-                onClick={() => handleContactProfessional(prof.name)}
-                className="w-full py-2 rounded-xl font-semibold text-sm transition-smooth hover:opacity-90"
-                style={{
-                  backgroundColor: "oklch(0.6 0.15 240)",
-                  color: "white",
-                  fontFamily: "'Poppins', sans-serif",
-                }}
-              >
-                Conversar com profissional
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Mensagem final */}
-        <div
-          className="mt-8 p-5 rounded-2xl text-center"
-          style={{
-            backgroundColor: "oklch(0.92 0.05 160)",
-          }}
-        >
-          <p
-            style={{
-              color: "oklch(0.3 0.02 65)",
-              fontFamily: "'Inter', sans-serif",
-              fontSize: "14px",
-              lineHeight: "1.5",
-            }}
+    <main className="min-h-screen bg-[#050a1c] px-5 py-6 text-white sm:px-8">
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-6 flex items-center justify-between gap-4">
+          <button
+            onClick={() => setLocation("/espaco")}
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/76 transition-smooth hover:bg-white/10"
+            type="button"
           >
-            Você pode voltar para o chat quando quiser ou explorar mais
-            profissionais.
-          </p>
-        </div>
-      </div>
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para o Espaço
+          </button>
+          <button
+            onClick={() => setLocation("/cadastro-psicologo")}
+            className="rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[#101735] transition-smooth hover:bg-white/90"
+            type="button"
+          >
+            Sou psicólogo
+          </button>
+        </header>
 
-      {/* Botão de voltar */}
-      <div className="px-6 py-6 border-t border-gray-100 bg-white">
-        <button
-          onClick={() => setLocation("/espaco")}
-          className="w-full py-3 text-sm font-semibold rounded-2xl transition-smooth"
-          style={{
-            color: "oklch(0.55 0.02 65)",
-            fontFamily: "'Inter', sans-serif",
-            backgroundColor: "transparent",
-          }}
-        >
-          Voltar para o Espaço
-        </button>
+        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111a45] via-[#101633] to-[#080d22] p-6 md:p-8">
+          <div className="flex items-center gap-3">
+            <UserRound className="h-8 w-8 text-[#86cfff]" />
+            <div>
+              <h1 className="text-3xl font-bold">Psicólogos disponíveis</h1>
+              <p className="mt-2 text-white/66">Profissionais aprovados pelo Espaço Amigo para acolhimento inicial.</p>
+            </div>
+          </div>
+
+          <div className="mt-7 grid gap-5 md:grid-cols-2">
+            {professionals.map((professional) => (
+              <article key={professional.id} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-black/20">
+                <div className="flex items-start gap-4">
+                  {professional.fotoUrl ? (
+                    <img src={professional.fotoUrl} alt={professional.nome} className="h-20 w-20 rounded-2xl object-cover" />
+                  ) : (
+                    <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f3a0c5] to-[#8ecfff] text-xl font-bold text-[#071027]">
+                      {initials(professional.nome)}
+                    </div>
+                  )}
+                  <div>
+                    <h2 className="text-xl font-bold">{professional.nome}</h2>
+                    <p className="mt-1 text-sm font-semibold text-[#d7b8ff]">{professional.especialidadePrincipal}</p>
+                    <p className="mt-3 text-sm leading-6 text-white/66">{professional.bio}</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-2 text-xs text-white/72">
+                  {professional.atendimentoOnline ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/8 px-3 py-1">
+                      <Video className="h-3.5 w-3.5" />
+                      Online
+                    </span>
+                  ) : null}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/8 px-3 py-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {professional.cidade || "Cidade"} {professional.estado ? `/ ${professional.estado}` : ""}
+                  </span>
+                </div>
+
+                <p className="mt-4 text-sm text-white/58">{professional.horariosDisponiveis}</p>
+                <a
+                  href={buildProfessionalMailto(professional.nome)}
+                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-4 py-3 text-sm font-bold text-white transition-smooth hover:opacity-90"
+                >
+                  <Mail className="h-4 w-4" />
+                  Conversar com profissional
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

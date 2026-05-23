@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { fallbackPsychologists, fetchApprovedPsychologists, initials, type Psychologist } from "@/lib/psychologists";
 import {
   ArrowRight,
   Brain,
@@ -61,24 +62,6 @@ const contentCards = [
   },
 ];
 
-const professionals = [
-  {
-    name: "Vitor Dias Pontes",
-    area: "Acolhimento emocional",
-    status: "Online",
-  },
-  {
-    name: "Marcelo Pereira Bastos",
-    area: "Rotina, medo e ansiedade",
-    status: "Disponível hoje",
-  },
-  {
-    name: "Camila Pereira",
-    area: "Relações e autoestima",
-    status: "Online",
-  },
-];
-
 const birthMonths = [
   "Janeiro",
   "Fevereiro",
@@ -110,10 +93,17 @@ export default function Welcome() {
   const [authErrors, setAuthErrors] = useState<Record<string, string>>({});
   const [authMessage, setAuthMessage] = useState("");
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
+  const [approvedPsychologists, setApprovedPsychologists] = useState<Psychologist[] | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("auth") === "complete") openAuthModal("complete");
+  }, []);
+
+  useEffect(() => {
+    fetchApprovedPsychologists()
+      .then(setApprovedPsychologists)
+      .catch(() => setApprovedPsychologists(null));
   }, []);
 
   useEffect(() => {
@@ -123,6 +113,7 @@ export default function Welcome() {
   }, [authMode, setLocation, user]);
 
   const goToChat = () => setLocation("/chat-start");
+  const visiblePsychologists = approvedPsychologists ?? fallbackPsychologists;
   const openAuthModal = (mode: "login" | "signup" | "complete") => {
     setAuthForm(emptyAuthForm);
     setAuthErrors({});
@@ -240,6 +231,9 @@ export default function Welcome() {
               </button>
               <button onClick={() => scrollToSection("sobre")} type="button">
                 Sobre
+              </button>
+              <button onClick={() => setLocation("/cadastro-psicologo")} type="button">
+                Sou psicólogo
               </button>
             </nav>
 
@@ -455,34 +449,35 @@ export default function Welcome() {
               </p>
             </div>
             <button
-              onClick={() => setLocation("/professionals")}
+              onClick={() => setLocation("/cadastro-psicologo")}
               className="flex items-center gap-2 text-sm font-semibold text-[#d7b8ff]"
               type="button"
             >
-              Ver todos os psicólogos
+              Sou psicólogo
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-            {professionals.map((professional, index) => (
+            {visiblePsychologists.slice(0, 3).map((professional, index) => (
               <article
-                key={professional.name}
+                key={professional.id}
                 className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-lg shadow-black/20 backdrop-blur"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f3a0c5] to-[#8ecfff] text-xl font-bold text-[#071027]">
-                    {professional.name
-                      .split(" ")
-                      .map((part) => part[0])
-                      .slice(0, 2)
-                      .join("")}
-                  </div>
+                  {professional.fotoUrl ? (
+                    <img src={professional.fotoUrl} alt={professional.nome} className="h-16 w-16 rounded-2xl object-cover" />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f3a0c5] to-[#8ecfff] text-xl font-bold text-[#071027]">
+                      {initials(professional.nome)}
+                    </div>
+                  )}
                   <div>
-                    <h3 className="text-lg font-bold">{professional.name}</h3>
-                    <p className="mt-1 text-sm text-white/66">{professional.area}</p>
+                    <h3 className="text-lg font-bold">{professional.nome}</h3>
+                    <p className="mt-1 text-sm text-white/66">{professional.especialidadePrincipal}</p>
                   </div>
                 </div>
+                <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/62">{professional.bio}</p>
                 <div className="mt-5 flex items-center justify-between gap-3">
                   <span className="flex items-center gap-2 text-sm text-white/78">
                     <span
@@ -490,7 +485,7 @@ export default function Welcome() {
                         index === 1 ? "bg-[#ff9db8]" : "bg-[#70f29d]"
                       }`}
                     />
-                    {professional.status}
+                    {professional.horariosDisponiveis}
                   </span>
                   <button
                     onClick={() => setLocation("/professionals")}

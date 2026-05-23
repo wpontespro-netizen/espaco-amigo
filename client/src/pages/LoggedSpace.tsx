@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { buildProfessionalMailto, fallbackPsychologists, fetchApprovedPsychologists, type Psychologist } from "@/lib/psychologists";
 import {
   Bookmark,
   Heart,
@@ -21,7 +22,7 @@ import {
   Wind,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
 const moods = ["Ansiedade", "Solidão", "Pensamentos que doem", "Baixa autoestima", "Recaída"];
@@ -91,12 +92,6 @@ const helpPhones = [
   { name: "Alcoólicos Anônimos", text: "Grupos de apoio e reuniões", time: "Grupos de apoio", link: "https://www.aa.org.br" },
 ];
 
-const professionals = [
-  { name: "Vitor Dias Pontes", area: "Acolhimento emocional", status: "Disponível" },
-  { name: "Marcelo Pereira Bastos", area: "Rotina, medo e preocupação", status: "Disponível" },
-  { name: "Camila Rocha", area: "Relacionamentos, autoestima e luto", status: "Disponível" },
-];
-
 const navItems = [
   { label: "Início", id: "inicio", icon: Home },
   { label: "Vídeos", id: "videos", icon: Video },
@@ -118,8 +113,16 @@ export default function LoggedSpace() {
   const [showProfile, setShowProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({ name: "", age: "", birthMonth: "" });
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+  const [approvedPsychologists, setApprovedPsychologists] = useState<Psychologist[] | null>(null);
+
+  useEffect(() => {
+    fetchApprovedPsychologists()
+      .then(setApprovedPsychologists)
+      .catch(() => setApprovedPsychologists(null));
+  }, []);
 
   const goToChat = () => setLocation("/chat-start");
+  const professionals = approvedPsychologists ?? fallbackPsychologists;
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -147,19 +150,6 @@ export default function LoggedSpace() {
       const next = Math.floor(Math.random() * todayPhrases.length);
       return next === current ? (next + 1) % todayPhrases.length : next;
     });
-  };
-  const buildProfessionalMailto = (professionalName: string) => {
-    const body = [
-      `Nome do usuário: ${user?.name || "Não informado"}`,
-      `Email do usuário: ${user?.email || "Não informado"}`,
-      `Profissional escolhido: ${professionalName}`,
-      "",
-      "Gostaria de conversar com este profissional.",
-    ].join("\n");
-
-    return `mailto:wpontes.pro@gmail.com?subject=${encodeURIComponent(
-      "Contato pelo Espaço Amigo",
-    )}&body=${encodeURIComponent(body)}`;
   };
   const openProfile = () => {
     setProfileForm({
@@ -427,12 +417,13 @@ export default function LoggedSpace() {
               </div>
               <div className="mt-5 space-y-3">
                 {professionals.map((professional) => (
-                  <div key={professional.name} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                    <h3 className="font-bold">{professional.name}</h3>
-                    <p className="mt-1 text-sm text-white/62">{professional.area}</p>
-                    <p className="mt-2 text-sm text-[#a5ffc1]">• {professional.status}</p>
+                  <div key={professional.id} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <h3 className="font-bold">{professional.nome}</h3>
+                    <p className="mt-1 text-sm text-white/62">{professional.especialidadePrincipal}</p>
+                    <p className="mt-2 line-clamp-2 text-sm text-white/54">{professional.bio}</p>
+                    <p className="mt-2 text-sm text-[#a5ffc1]">• {professional.horariosDisponiveis}</p>
                     <a
-                      href={buildProfessionalMailto(professional.name)}
+                      href={buildProfessionalMailto(professional.nome, user)}
                       className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-4 py-3 text-sm font-bold text-white transition-smooth hover:opacity-90"
                     >
                       <Mail className="h-4 w-4" />
@@ -442,7 +433,7 @@ export default function LoggedSpace() {
                 ))}
               </div>
               <button
-                onClick={() => showPlaceholder("Lista de psicólogos")}
+                onClick={() => setLocation("/professionals")}
                 className="mt-5 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/82 transition-smooth hover:bg-white/10"
                 type="button"
               >
