@@ -1,4 +1,4 @@
-import { createPsychologistApplication, listApprovedPsychologists } from "../server/psychologistApi.js";
+import { createPsychologistApplication, listApprovedPsychologists, uploadPsychologistPhoto } from "../server/psychologistApi.js";
 
 interface ApiRequest {
   body?: unknown;
@@ -18,6 +18,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
 
     if (req.method === "POST") {
+      const action = (req.body as { action?: string } | undefined)?.action;
+      if (action === "upload-photo") {
+        const result = await uploadPsychologistPhoto(req.body);
+        if (!result.ok) return res.status(400).json(result);
+        return res.status(200).json(result);
+      }
+
       const result = await createPsychologistApplication(req.body);
       if (!result.ok) return res.status(400).json(result);
       return res.status(200).json({

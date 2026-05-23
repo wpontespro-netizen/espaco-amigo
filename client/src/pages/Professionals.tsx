@@ -64,12 +64,10 @@ export default function Professionals() {
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-2 text-xs text-white/72">
-                  {professional.atendimentoOnline ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/8 px-3 py-1">
-                      <Video className="h-3.5 w-3.5" />
-                      Online
-                    </span>
-                  ) : null}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/8 px-3 py-1">
+                    <Video className="h-3.5 w-3.5" />
+                    Online
+                  </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-white/8 px-3 py-1">
                     <MapPin className="h-3.5 w-3.5" />
                     {professional.cidade || "Cidade"} {professional.estado ? `/ ${professional.estado}` : ""}

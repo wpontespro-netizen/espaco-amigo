@@ -14,7 +14,7 @@ import {
   updateUserProfile,
 } from "./authApi";
 import { handleChatRequest, loadLocalEnv } from "./chatApi";
-import { createPsychologistApplication, listApprovedPsychologists } from "./psychologistApi";
+import { createPsychologistApplication, listApprovedPsychologists, uploadPsychologistPhoto } from "./psychologistApi";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +27,7 @@ async function startServer() {
   app.set("trust proxy", true);
   const server = createServer(app);
 
-  app.use(express.json({ limit: "1mb" }));
+  app.use(express.json({ limit: "5mb" }));
 
   app.post("/api/chat", async (req, res) => {
     try {
@@ -55,6 +55,16 @@ async function startServer() {
 
   app.post("/api/psychologists", async (req, res) => {
     try {
+      if ((req.body as { action?: string })?.action === "upload-photo") {
+        const uploadResult = await uploadPsychologistPhoto(req.body);
+        if (!uploadResult.ok) {
+          res.status(400).json(uploadResult);
+          return;
+        }
+        res.json(uploadResult);
+        return;
+      }
+
       const result = await createPsychologistApplication(req.body);
       if (!result.ok) {
         res.status(400).json(result);

@@ -17,7 +17,7 @@ import {
   updateUserProfile,
 } from "./server/authApi";
 import { handleChatRequest, loadLocalEnv } from "./server/chatApi";
-import { createPsychologistApplication, listApprovedPsychologists } from "./server/psychologistApi";
+import { createPsychologistApplication, listApprovedPsychologists, uploadPsychologistPhoto } from "./server/psychologistApi";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -286,6 +286,18 @@ function vitePluginPsychologistsApi(): Plugin {
           req.on("end", async () => {
             try {
               const payload = body ? JSON.parse(body) : {};
+              if (payload.action === "upload-photo") {
+                const uploadResult = await uploadPsychologistPhoto(payload);
+                if (!uploadResult.ok) {
+                  res.writeHead(400, { "Content-Type": "application/json" });
+                  res.end(JSON.stringify(uploadResult));
+                  return;
+                }
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(uploadResult));
+                return;
+              }
+
               const result = await createPsychologistApplication(payload);
               if (!result.ok) {
                 res.writeHead(400, { "Content-Type": "application/json" });

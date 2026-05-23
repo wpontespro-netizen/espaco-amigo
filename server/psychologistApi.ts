@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 export interface PublicPsychologist {
   id: string;
   nome: string;
@@ -10,14 +12,8 @@ export interface PublicPsychologist {
   fotoUrl: string;
   horasSemanais: string;
   horariosDisponiveis: string;
-  abordagem: string;
   cidade: string;
   estado: string;
-  atendimentoOnline: boolean;
-  linkedin?: string;
-  instagram?: string;
-  site?: string;
-  valorSessao?: string;
   status: "em_avaliacao" | "aprovado" | "recusado";
 }
 
@@ -33,14 +29,8 @@ interface PsychologistRow {
   foto_url: string;
   horas_semanais: string;
   horarios_disponiveis: string;
-  abordagem: string;
   cidade: string;
   estado: string;
-  atendimento_online: boolean;
-  linkedin?: string | null;
-  instagram?: string | null;
-  site?: string | null;
-  valor_sessao?: string | null;
   status: "em_avaliacao" | "aprovado" | "recusado";
 }
 
@@ -55,14 +45,8 @@ type PsychologistPayload = Partial<{
   fotoUrl: string;
   horasSemanais: string;
   horariosDisponiveis: string;
-  abordagem: string;
   cidade: string;
   estado: string;
-  atendimentoOnline: boolean;
-  linkedin: string;
-  instagram: string;
-  site: string;
-  valorSessao: string;
 }>;
 
 export async function listApprovedPsychologists() {
@@ -78,7 +62,7 @@ export async function createPsychologistApplication(payload: unknown) {
   const errors = validatePsychologist(data);
   if (Object.keys(errors).length) return { ok: false, errors };
 
-  const row = {
+  await supabaseDb("/psychologists", "POST", {
     id: randomUUID(),
     nome: clean(data.nome),
     email: normalizeEmail(data.email || ""),
@@ -90,19 +74,41 @@ export async function createPsychologistApplication(payload: unknown) {
     foto_url: clean(data.fotoUrl),
     horas_semanais: clean(data.horasSemanais),
     horarios_disponiveis: clean(data.horariosDisponiveis),
-    abordagem: clean(data.abordagem),
     cidade: clean(data.cidade),
     estado: clean(data.estado),
-    atendimento_online: Boolean(data.atendimentoOnline),
-    linkedin: cleanOptional(data.linkedin),
-    instagram: cleanOptional(data.instagram),
-    site: cleanOptional(data.site),
-    valor_sessao: cleanOptional(data.valorSessao),
     status: "em_avaliacao",
-  };
-
-  await supabaseDb("/psychologists", "POST", row);
+  });
   return { ok: true };
+}
+
+export async function uploadPsychologistPhoto(payload: unknown) {
+  const data = payload as Partial<{ fileName: string; dataUrl: string }>;
+  const match = String(data.dataUrl || "").match(/^data:(image\/(?:png|jpe?g|webp));base64,(.+)$/i);
+  if (!match) return { ok: false, error: "Envie uma imagem válida." };
+
+  const mimeType = match[1].toLowerCase();
+  const buffer = Buffer.from(match[2], "base64");
+  if (buffer.byteLength > 2 * 1024 * 1024) return { ok: false, error: "A imagem deve ter até 2MB." };
+
+  const extension = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
+  const safeName = clean(data.fileName).replace(/[^a-z0-9_.-]/gi, "-").toLowerCase() || `foto.${extension}`;
+  const path = `${randomUUID()}-${safeName.replace(/\.[^.]+$/, "")}.${extension}`;
+  const { url, serviceKey } = supabaseConfig();
+  const response = await fetch(`${url}/storage/v1/object/psychologist-photos/${path}`, {
+    method: "POST",
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      "Content-Type": mimeType,
+      "x-upsert": "false",
+    },
+    body: buffer,
+  });
+  const text = await response.text();
+  const responseData = text ? JSON.parse(text) : null;
+  if (!response.ok) throw new Error(responseData?.message || `Supabase storage error ${response.status}`);
+
+  return { ok: true, url: `${url}/storage/v1/object/public/psychologist-photos/${path}` };
 }
 
 function validatePsychologist(data: PsychologistPayload) {
@@ -113,10 +119,9 @@ function validatePsychologist(data: PsychologistPayload) {
   if (!clean(data.crp)) errors.crp = "Informe seu CRP.";
   if (!clean(data.bio)) errors.bio = "Escreva uma bio curta.";
   if (!clean(data.especialidadePrincipal)) errors.especialidadePrincipal = "Informe a especialidade principal.";
-  if (!clean(data.fotoUrl)) errors.fotoUrl = "Informe a URL da foto profissional.";
+  if (!clean(data.fotoUrl)) errors.fotoUrl = "Envie uma foto profissional.";
   if (!clean(data.horasSemanais)) errors.horasSemanais = "Informe as horas semanais.";
-  if (!clean(data.horariosDisponiveis)) errors.horariosDisponiveis = "Informe os horários disponíveis.";
-  if (!clean(data.abordagem)) errors.abordagem = "Informe sua abordagem ou forma de atendimento.";
+  if (!hasSchedule(data.horariosDisponiveis)) errors.horariosDisponiveis = "Informe ao menos um dia e horário.";
   if (!clean(data.cidade)) errors.cidade = "Informe sua cidade.";
   if (!clean(data.estado)) errors.estado = "Informe seu estado.";
   return errors;
@@ -134,15 +139,9 @@ function rowToPsychologist(row: PsychologistRow): PublicPsychologist {
     outrasEspecialidades: row.outras_especialidades || undefined,
     fotoUrl: row.foto_url,
     horasSemanais: row.horas_semanais,
-    horariosDisponiveis: row.horarios_disponiveis,
-    abordagem: row.abordagem,
+    horariosDisponiveis: summarizeSchedule(row.horarios_disponiveis),
     cidade: row.cidade,
     estado: row.estado,
-    atendimentoOnline: row.atendimento_online,
-    linkedin: row.linkedin || undefined,
-    instagram: row.instagram || undefined,
-    site: row.site || undefined,
-    valorSessao: row.valor_sessao || undefined,
     status: row.status,
   };
 }
@@ -163,6 +162,30 @@ async function supabaseDb(path: string, method = "GET", body?: unknown) {
   const data = text ? JSON.parse(text) : null;
   if (!response.ok) throw new Error(data?.message || `Supabase error ${response.status}`);
   return data;
+}
+
+function hasSchedule(value?: string) {
+  try {
+    const days = JSON.parse(clean(value)) as { active?: boolean; start?: string; end?: string }[];
+    return days.some((day) => day.active && clean(day.start) && clean(day.end));
+  } catch {
+    return Boolean(clean(value));
+  }
+}
+
+function summarizeSchedule(value: string) {
+  try {
+    const days = JSON.parse(value) as { day: string; active?: boolean; start?: string; end?: string }[];
+    const activeDays = days.filter((day) => day.active && day.start && day.end);
+    if (!activeDays.length) return "Disponibilidade a combinar";
+    return activeDays.map((day) => `${day.day}, ${formatHour(day.start)} às ${formatHour(day.end)}`).join(". ");
+  } catch {
+    return value;
+  }
+}
+
+function formatHour(value?: string) {
+  return clean(value).replace(":00", "h").replace(":", "h");
 }
 
 function supabaseConfig() {
@@ -188,4 +211,3 @@ function normalizeEmail(email: string) {
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-import { randomUUID } from "node:crypto";

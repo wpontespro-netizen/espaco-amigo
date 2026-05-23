@@ -37,18 +37,19 @@ create table if not exists public.psychologists (
   foto_url text not null,
   horas_semanais text not null,
   horarios_disponiveis text not null,
-  abordagem text not null,
   cidade text not null,
   estado text not null,
-  atendimento_online boolean not null default true,
-  linkedin text,
-  instagram text,
-  site text,
-  valor_sessao text,
   status text not null default 'em_avaliacao' check (status in ('em_avaliacao', 'aprovado', 'recusado')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.psychologists drop column if exists abordagem;
+alter table public.psychologists drop column if exists atendimento_online;
+alter table public.psychologists drop column if exists linkedin;
+alter table public.psychologists drop column if exists instagram;
+alter table public.psychologists drop column if exists site;
+alter table public.psychologists drop column if exists valor_sessao;
 
 drop trigger if exists psychologists_set_updated_at on public.psychologists;
 

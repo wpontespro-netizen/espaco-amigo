@@ -10,14 +10,8 @@ export interface Psychologist {
   fotoUrl: string;
   horasSemanais: string;
   horariosDisponiveis: string;
-  abordagem: string;
   cidade: string;
   estado: string;
-  atendimentoOnline: boolean;
-  linkedin?: string;
-  instagram?: string;
-  site?: string;
-  valorSessao?: string;
   status: "em_avaliacao" | "aprovado" | "recusado";
 }
 
@@ -33,10 +27,8 @@ export const fallbackPsychologists: Psychologist[] = [
     fotoUrl: "",
     horasSemanais: "Disponível",
     horariosDisponiveis: "Disponível hoje",
-    abordagem: "Acolhimento inicial",
     cidade: "",
     estado: "",
-    atendimentoOnline: true,
     status: "aprovado",
   },
   {
@@ -50,10 +42,8 @@ export const fallbackPsychologists: Psychologist[] = [
     fotoUrl: "",
     horasSemanais: "Disponível",
     horariosDisponiveis: "Disponível hoje",
-    abordagem: "Acolhimento inicial",
     cidade: "",
     estado: "",
-    atendimentoOnline: true,
     status: "aprovado",
   },
   {
@@ -67,10 +57,8 @@ export const fallbackPsychologists: Psychologist[] = [
     fotoUrl: "",
     horasSemanais: "Disponível",
     horariosDisponiveis: "Disponível hoje",
-    abordagem: "Acolhimento inicial",
     cidade: "",
     estado: "",
-    atendimentoOnline: true,
     status: "aprovado",
   },
 ];
