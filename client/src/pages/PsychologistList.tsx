@@ -28,7 +28,7 @@ export default function PsychologistList() {
             Voltar
           </button>
           <button
-            onClick={() => setLocation("/professionals")}
+            onClick={() => setLocation("/psicologos")}
             className="rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/78 transition-smooth hover:bg-white/10"
             type="button"
           >

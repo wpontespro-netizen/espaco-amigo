@@ -29,7 +29,7 @@ const contentCards = [
     tone: "from-violet-500/25 via-slate-900/70 to-[#070c22]",
   },
   {
-    title: "Áudios de meditação",
+    title: "Áudio de meditação",
     text: "Pausas guiadas para atravessar momentos difíceis com mais calma.",
     icon: Headphones,
     tone: "from-rose-400/25 via-slate-900/65 to-[#111733]",
@@ -210,13 +210,13 @@ export default function Welcome() {
               <button onClick={() => scrollToSection("conteudos")} type="button">
                 Conteúdos
               </button>
-              <button onClick={() => setLocation("/professionals")} type="button">
+              <button onClick={() => setLocation("/psicologos")} type="button">
                 Psicólogos
               </button>
               <button onClick={() => scrollToSection("sobre")} type="button">
                 Sobre
               </button>
-              <button onClick={() => setLocation("/professionals")} type="button">
+              <button onClick={() => setLocation("/psicologos")} type="button">
                 Sou psicólogo
               </button>
             </nav>
@@ -274,14 +274,14 @@ export default function Welcome() {
               </div>
 
               <h1 className="text-5xl font-bold leading-[1.04] tracking-normal sm:text-6xl lg:text-7xl">
-                Você não precisa passar por{" "}
+                Quando tudo parece demais e não há mais saída,{" "}
                 <span className="bg-gradient-to-r from-[#f49cc7] via-[#b991ff] to-[#8dd7ff] bg-clip-text text-transparent">
-                  isso sozinho.
+                  você não precisa enfrentar sozinho.
                 </span>
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-white/78">
-                Quando tudo parece pesado demais, o Espaço Amigo acolhe você com presença, ferramentas simples e caminhos para encontrar apoio humano.
+                O Espaço Amigo acolhe você com presença, ferramentas simples e caminhos para encontrar apoio humano.
               </p>
 
               <p className="mt-5 flex items-center gap-3 text-base text-[#ffc0da]">
@@ -309,20 +309,20 @@ export default function Welcome() {
             </div>
 
             <div className="relative min-h-[420px] overflow-hidden rounded-[2rem] border border-white/12 bg-[#101735]/70 shadow-2xl shadow-black/30">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#030614] via-[#141034] to-[#442042]" />
-              <div className="absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(circle_at_30%_40%,rgba(70,91,160,0.22),transparent_38%)]" />
-              <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_35%,rgba(255,173,131,0.35),transparent_42%)]" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#020512] via-[#171338] to-[#45253f]" />
+              <div className="absolute inset-y-0 left-0 w-[58%] bg-[radial-gradient(circle_at_35%_42%,rgba(64,79,145,0.24),transparent_38%)]" />
+              <div className="absolute inset-y-0 right-0 w-[54%] bg-[radial-gradient(circle_at_76%_36%,rgba(255,180,122,0.38),transparent_40%)]" />
               <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050a1c] to-transparent" />
-              <div className="absolute bottom-20 left-[18%] h-28 w-24 rounded-full bg-[#11182f] opacity-80 blur-sm" />
-              <div className="absolute bottom-16 left-[28%] h-48 w-32 rounded-t-[5rem] bg-[#080d1d]/90 shadow-2xl shadow-black/40" />
-              <div className="absolute bottom-52 left-[32%] h-20 w-20 rounded-full bg-[#151c32]" />
-              <div className="absolute bottom-48 left-[31%] h-10 w-24 rounded-full bg-[#0b1024]/80" />
-              <div className="absolute bottom-32 right-[18%] h-24 w-40 rounded-full bg-[#ffb083]/20 blur-2xl" />
-              <div className="absolute right-14 top-16 h-24 w-24 rounded-full bg-[#ffb083]/30 blur-2xl" />
-              <div className="absolute bottom-28 right-24 h-1 w-44 rounded-full bg-gradient-to-r from-transparent via-[#ffd0aa] to-transparent" />
+              <div className="absolute bottom-16 left-[24%] h-52 w-36 rounded-t-[5rem] bg-[#070b18]/95 shadow-2xl shadow-black/50" />
+              <div className="absolute bottom-56 left-[29%] h-20 w-20 rounded-full bg-[#151c32]" />
+              <div className="absolute bottom-[13rem] left-[28%] h-10 w-24 rounded-full bg-[#0b1024]/80" />
+              <div className="absolute bottom-28 right-[17%] h-24 w-44 rounded-full bg-[#ffb083]/24 blur-2xl" />
+              <div className="absolute right-14 top-14 h-28 w-28 rounded-full bg-[#ffb083]/26 blur-2xl" />
+              <div className="absolute bottom-28 right-24 h-1 w-48 rounded-full bg-gradient-to-r from-transparent via-[#ffd0aa] to-transparent" />
               <div className="absolute right-20 bottom-24 h-32 w-20 rounded-t-full border border-[#ffcfaa]/40 bg-[#160f1d]/70">
                 <div className="absolute left-1/2 top-7 h-14 w-9 -translate-x-1/2 rounded-full bg-[#ffad63]/55 shadow-[0_0_42px_rgba(255,173,99,0.7)]" />
               </div>
+              <div className="absolute bottom-24 left-[52%] h-1 w-40 rotate-[-8deg] rounded-full bg-gradient-to-r from-[#3f4f8d] via-[#a977ff] to-[#ffd0aa]" />
               <div className="relative z-10 flex h-full min-h-[420px] flex-col justify-end p-7">
                 <div className="max-w-sm rounded-2xl border border-white/12 bg-[#071027]/72 p-5 backdrop-blur">
                   <Heart className="mb-4 h-8 w-8 text-[#f4a5d7]" />
@@ -337,7 +337,7 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="conteudos" className="relative px-5 py-16 sm:px-8 lg:px-12">
+      <section id="conteudos" className="relative bg-[#f6f1ff] px-5 py-16 text-[#131936] sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl">
           <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
@@ -345,13 +345,13 @@ export default function Welcome() {
                 <Sprout className="h-7 w-7" />
                 <h2 className="text-3xl font-bold">Pílulas de acolhimento</h2>
               </div>
-              <p className="max-w-xl text-white/68">
+              <p className="max-w-xl text-[#5f6580]">
                 Ferramentas simples para atravessar o momento com um pouco mais de presença.
               </p>
             </div>
             <button
               onClick={() => scrollToSection("conteudos")}
-              className="hidden items-center gap-2 text-sm font-semibold text-[#d7b8ff] md:flex"
+              className="hidden items-center gap-2 text-sm font-semibold text-[#7a57cb] md:flex"
               type="button"
             >
               Ver todos
@@ -366,7 +366,7 @@ export default function Welcome() {
                 <button
                   key={card.title}
                   onClick={() => openContentPlaceholder(card.title)}
-                  className={`group min-h-[255px] rounded-2xl border border-white/10 bg-gradient-to-br ${card.tone} p-5 text-left shadow-lg shadow-black/20 transition-smooth hover:border-white/25`}
+                  className={`group min-h-[235px] rounded-3xl border border-white/70 bg-gradient-to-br ${card.tone} p-5 text-left text-white shadow-xl shadow-[#7760a8]/15 transition-smooth hover:-translate-y-1 hover:border-[#b89cff]`}
                   type="button"
                 >
                   <Icon className="mb-9 h-8 w-8 text-[#c7a7ff]" />
@@ -379,18 +379,18 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="chat" className="px-5 py-8 sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 rounded-3xl border border-white/10 bg-gradient-to-r from-[#121a45] via-[#121a3b] to-[#0d1430] p-6 shadow-xl shadow-black/25 md:grid-cols-[0.7fr_1.25fr_0.8fr] md:p-8">
+      <section id="chat" className="bg-[#f6f1ff] px-5 py-8 sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl items-center gap-8 rounded-[2rem] border border-[#e0d8fb] bg-white p-6 text-[#131936] shadow-xl shadow-[#8b74bd]/15 md:grid-cols-[0.7fr_1.25fr_0.8fr] md:p-8">
           <div className="flex min-h-44 items-center justify-center rounded-3xl bg-gradient-to-br from-[#b99cff]/28 to-[#ff93b3]/18">
             <Heart className="h-24 w-24 fill-[#ffb3ce]/45 text-[#d3b6ff]" />
           </div>
 
           <div>
             <h2 className="text-3xl font-bold">Precisa conversar agora?</h2>
-            <p className="mt-4 max-w-xl leading-7 text-white/74">
-              Nosso chat é um espaço seguro para você falar, organizar seus pensamentos e ser ouvido.
+            <p className="mt-4 max-w-xl leading-7 text-[#5f6580]">
+              O chat de acolhimento é um espaço seguro para você falar, organizar seus pensamentos e ser ouvido.
             </p>
-            <div className="mt-7 flex flex-wrap gap-4 text-sm text-white/80">
+            <div className="mt-7 flex flex-wrap gap-4 text-sm text-[#4e5570]">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-[#d7b8ff]" />
                 Sigilo e segurança
@@ -416,14 +416,14 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="psicologos" className="px-5 py-16 sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-8 rounded-3xl border border-white/10 bg-gradient-to-r from-[#111a45] via-[#121a3b] to-[#211336] p-7 shadow-xl shadow-black/25 md:grid-cols-[1fr_0.8fr] md:p-9">
+      <section id="psicologos" className="bg-[#f6f1ff] px-5 py-16 text-[#131936] sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl gap-8 rounded-[2rem] border border-[#e0d8fb] bg-gradient-to-r from-white via-[#fbf9ff] to-[#f0e9ff] p-7 shadow-xl shadow-[#8b74bd]/15 md:grid-cols-[1fr_0.8fr] md:p-9">
           <div>
             <div className="mb-4 flex items-center gap-3 text-[#86cfff]">
               <Users className="h-7 w-7" />
               <h2 className="text-3xl font-bold">Apoio humano quando você precisar</h2>
             </div>
-            <p className="max-w-2xl leading-7 text-white/70">
+            <p className="max-w-2xl leading-7 text-[#5f6580]">
               O Espaço Amigo também conecta pessoas a psicólogos parceiros. São profissionais avaliados com cuidado, para que a busca por apoio seja mais simples, humana e segura.
             </p>
           </div>
@@ -435,8 +435,8 @@ export default function Welcome() {
               Encontrar psicólogo
             </Button>
             <button
-              onClick={() => setLocation("/professionals")}
-              className="rounded-2xl border border-white/12 px-7 py-5 text-base font-bold text-white/86 transition-smooth hover:bg-white/10"
+              onClick={() => setLocation("/psicologos")}
+              className="rounded-2xl border border-[#d8cef6] bg-white px-7 py-5 text-base font-bold text-[#5c3db2] transition-smooth hover:bg-[#f8f4ff]"
               type="button"
             >
               Sou psicólogo
@@ -445,23 +445,35 @@ export default function Welcome() {
         </div>
       </section>
 
-      <footer id="sobre" className="px-5 pb-10 sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-3xl border border-white/10 bg-white/[0.07] p-7 shadow-xl shadow-black/20 md:grid-cols-[1.2fr_1.6fr] md:items-center">
+      <section id="sobre" className="bg-[#f6f1ff] px-5 pb-8 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#101735] p-7 text-white shadow-xl shadow-[#8b74bd]/15 md:p-9">
+          <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#d7b8ff]">Por que o Espaço Amigo existe</p>
+          <h2 className="mt-3 max-w-3xl text-3xl font-bold leading-tight">
+            Porque há momentos em que a pessoa só precisa encontrar um lugar seguro antes do próximo passo.
+          </h2>
+          <p className="mt-4 max-w-3xl leading-7 text-white/68">
+            O Espaço Amigo oferece acolhimento inicial, recursos simples e caminhos de apoio humano para quem está atravessando dias difíceis, sem diagnóstico, sem pressa e sem julgamento.
+          </p>
+        </div>
+      </section>
+
+      <footer className="bg-[#f6f1ff] px-5 pb-10 sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-3xl border border-[#d8cef6] bg-white p-7 text-[#131936] shadow-xl shadow-[#8b74bd]/15 md:grid-cols-[1.2fr_1.6fr] md:items-center">
           <div>
             <p className="text-2xl font-bold">Você importa. Você não está sozinho.</p>
-            <p className="mt-2 text-white/66">by Pensando Bem</p>
+            <p className="mt-2 text-[#6b718a]">by Pensando Bem</p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <span className="flex items-center gap-3 text-sm text-white/78">
+            <span className="flex items-center gap-3 text-sm text-[#535a76]">
               <ShieldCheck className="h-6 w-6 text-[#ff9fca]" />
               Ambiente seguro
             </span>
-            <span className="flex items-center gap-3 text-sm text-white/78">
+            <span className="flex items-center gap-3 text-sm text-[#535a76]">
               <LockKeyhole className="h-6 w-6 text-[#ff9fca]" />
               Privacidade garantida
             </span>
-            <span className="flex items-center gap-3 text-sm text-white/78">
+            <span className="flex items-center gap-3 text-sm text-[#535a76]">
               <Heart className="h-6 w-6 text-[#ff9fca]" />
               Acolhimento de verdade
             </span>
