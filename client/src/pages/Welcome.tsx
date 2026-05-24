@@ -216,7 +216,7 @@ export default function Welcome() {
               <button onClick={() => scrollToSection("sobre")} type="button">
                 Sobre
               </button>
-              <button onClick={() => setLocation("/psicologos")} type="button">
+              <button onClick={() => setLocation("/sou-psicologo")} type="button">
                 Sou psicólogo
               </button>
             </nav>
@@ -429,13 +429,13 @@ export default function Welcome() {
           </div>
           <div className="flex flex-col justify-center gap-3">
             <Button
-              onClick={() => setLocation("/encontrar-psicologo")}
+              onClick={() => setLocation("/psicologos")}
               className="h-auto rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-7 py-5 text-base font-bold text-white"
             >
               Encontrar psicólogo
             </Button>
             <button
-              onClick={() => setLocation("/psicologos")}
+              onClick={() => setLocation("/sou-psicologo")}
               className="rounded-2xl border border-[#d8cef6] bg-white px-7 py-5 text-base font-bold text-[#5c3db2] transition-smooth hover:bg-[#f8f4ff]"
               type="button"
             >

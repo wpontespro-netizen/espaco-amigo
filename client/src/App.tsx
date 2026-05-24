@@ -28,7 +28,8 @@ function Router() {
       <Route path="/continuity" component={Continuity} />
       <Route path="/referral" component={Referral} />
       <Route path="/professionals" component={Professionals} />
-      <Route path="/psicologos" component={Professionals} />
+      <Route path="/sou-psicologo" component={Professionals} />
+      <Route path="/psicologos" component={PsychologistList} />
       <Route path="/encontrar-psicologo" component={PsychologistList} />
       <Route path="/cadastro-psicologo" component={PsychologistSignup} />
       <Route path="/404" component={NotFound} />

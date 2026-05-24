@@ -1,11 +1,13 @@
 import { buildWhatsAppLink, fallbackPsychologists, fetchApprovedPsychologists, initials, type Psychologist } from "@/lib/psychologists";
-import { ArrowLeft, MapPin, MessageCircle, UserRound, Video } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, MapPin, MessageCircle, Search, UserRound, Video } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 
 export default function PsychologistList() {
   const [, setLocation] = useLocation();
   const [approvedPsychologists, setApprovedPsychologists] = useState<Psychologist[] | null>(null);
+  const [search, setSearch] = useState("");
+  const [specialty, setSpecialty] = useState("Todas");
 
   useEffect(() => {
     fetchApprovedPsychologists()
@@ -14,6 +16,22 @@ export default function PsychologistList() {
   }, []);
 
   const professionals = approvedPsychologists ?? fallbackPsychologists;
+  const specialties = useMemo(
+    () => ["Todas", ...Array.from(new Set(professionals.map((item) => item.especialidadePrincipal).filter(Boolean)))],
+    [professionals],
+  );
+  const filteredProfessionals = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return professionals.filter((professional) => {
+      const matchesSearch =
+        !term ||
+        [professional.nome, professional.especialidadePrincipal, professional.outrasEspecialidades, professional.bio]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(term));
+      const matchesSpecialty = specialty === "Todas" || professional.especialidadePrincipal === specialty;
+      return matchesSearch && matchesSpecialty;
+    });
+  }, [professionals, search, specialty]);
 
   return (
     <main className="min-h-screen bg-[#050a1c] px-5 py-6 text-white sm:px-8">
@@ -28,7 +46,7 @@ export default function PsychologistList() {
             Voltar
           </button>
           <button
-            onClick={() => setLocation("/psicologos")}
+            onClick={() => setLocation("/sou-psicologo")}
             className="rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/78 transition-smooth hover:bg-white/10"
             type="button"
           >
@@ -45,8 +63,31 @@ export default function PsychologistList() {
             </div>
           </div>
 
+          <div className="mt-7 grid gap-3 md:grid-cols-[1fr_260px]">
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/42" />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.06] py-4 pl-12 pr-4 text-white outline-none transition-smooth placeholder:text-white/38 focus:border-[#d7b8ff]/60"
+                placeholder="Buscar por nome ou especialidade"
+              />
+            </label>
+            <select
+              value={specialty}
+              onChange={(event) => setSpecialty(event.target.value)}
+              className="rounded-2xl border border-white/10 bg-[#101735] px-4 py-4 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60"
+            >
+              {specialties.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mt-7 grid gap-5 md:grid-cols-2">
-            {professionals.map((professional) => (
+            {filteredProfessionals.map((professional) => (
               <article key={professional.id} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-black/20">
                 <div className="flex items-start gap-4">
                   {professional.fotoUrl ? (
@@ -88,6 +129,11 @@ export default function PsychologistList() {
               </article>
             ))}
           </div>
+          {filteredProfessionals.length === 0 ? (
+            <div className="mt-7 rounded-3xl border border-white/10 bg-white/[0.05] p-6 text-center text-white/66">
+              Nenhum profissional encontrado com esses filtros.
+            </div>
+          ) : null}
         </section>
       </div>
     </main>

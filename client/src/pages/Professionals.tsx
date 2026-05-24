@@ -36,7 +36,7 @@ export default function Professionals() {
                   Quero me cadastrar
                 </button>
                 <button
-                  onClick={() => setLocation("/encontrar-psicologo")}
+                  onClick={() => setLocation("/psicologos")}
                   className="rounded-2xl border border-[#d8cef6] px-6 py-4 font-semibold text-[#5c3db2] transition-smooth hover:bg-[#f8f4ff]"
                   type="button"
                 >
