@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle, HeartHandshake, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock3, HeartHandshake, MessageCircle, ShieldCheck, UserRound, Video } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Professionals() {
@@ -23,24 +23,19 @@ export default function Professionals() {
                 <HeartHandshake className="h-4 w-4" />
                 Psicólogos parceiros
               </div>
-              <h1 className="max-w-3xl text-4xl font-bold leading-tight">Acolhimento humano começa com cuidado e responsabilidade.</h1>
+              <h1 className="max-w-3xl text-4xl font-bold leading-tight">
+                Faça parte da rede de psicólogos parceiros do Espaço Amigo
+              </h1>
               <p className="mt-5 max-w-2xl leading-7 text-[#5f6580]">
-                O Espaço Amigo aproxima pessoas em sofrimento emocional de profissionais alinhados com uma escuta ética, sensível e segura. A parceria passa por avaliação antes de qualquer perfil aparecer para os usuários.
+                Ajude pessoas que estão passando por momentos difíceis a encontrar acolhimento humano, ético e online.
               </p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7">
                 <button
                   onClick={() => setLocation("/cadastro-psicologo")}
                   className="rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-6 py-4 font-bold text-white transition-smooth hover:opacity-90"
                   type="button"
                 >
                   Quero me cadastrar
-                </button>
-                <button
-                  onClick={() => setLocation("/psicologos")}
-                  className="rounded-2xl border border-[#d8cef6] px-6 py-4 font-semibold text-[#5c3db2] transition-smooth hover:bg-[#f8f4ff]"
-                  type="button"
-                >
-                  Ver profissionais
                 </button>
               </div>
             </div>
@@ -64,6 +59,64 @@ export default function Professionals() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section className="mt-6 rounded-[2rem] border border-[#d8cef6] bg-white p-6 shadow-xl shadow-[#8b74bd]/10 md:p-8">
+          <h2 className="text-2xl font-bold">Por que atender pelo Espaço Amigo?</h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {[
+              { label: "Pessoas buscando acolhimento", icon: HeartHandshake },
+              { label: "Atendimento online", icon: Video },
+              { label: "Autonomia de horários", icon: Clock3 },
+              { label: "Perfil avaliado antes da publicação", icon: ShieldCheck },
+              { label: "Contato direto pelo WhatsApp", icon: MessageCircle },
+            ].map(({ label, icon: CardIcon }) => {
+              return (
+                <div key={label} className="rounded-3xl border border-[#e0d8fb] bg-[#fbf9ff] p-5">
+                  <CardIcon className="h-7 w-7 text-[#7a57cb]" />
+                  <p className="mt-4 text-sm font-bold leading-5">{label}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-6 grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-[#d8cef6] bg-white p-6 shadow-xl shadow-[#8b74bd]/10 md:p-8">
+            <h2 className="text-2xl font-bold">Como funciona?</h2>
+            <div className="mt-5 space-y-4">
+              {[
+                "Envie seus dados profissionais",
+                "A equipe avalia seu cadastro",
+                "Após aprovação, seu perfil fica visível",
+                "Usuários entram em contato pelo WhatsApp",
+              ].map((step, index) => (
+                <div key={step} className="flex gap-4 rounded-2xl bg-[#f6f1ff] p-4">
+                  <span className="font-bold text-[#7a57cb]">0{index + 1}</span>
+                  <p className="font-semibold text-[#333a58]">{step}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-[#d8cef6] bg-gradient-to-br from-[#101735] to-[#211336] p-6 text-white shadow-xl shadow-[#8b74bd]/10 md:p-8">
+            <ShieldCheck className="h-9 w-9 text-[#d7b8ff]" />
+            <h2 className="mt-4 text-2xl font-bold">Processo de avaliação</h2>
+            <p className="mt-4 leading-7 text-white/70">
+              O cadastro passa por avaliação manual para garantir alinhamento com a proposta de acolhimento do Espaço Amigo.
+            </p>
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-[2rem] border border-[#d8cef6] bg-white p-8 text-center shadow-xl shadow-[#8b74bd]/10">
+          <h2 className="text-3xl font-bold">Quer fazer parte?</h2>
+          <button
+            onClick={() => setLocation("/cadastro-psicologo")}
+            className="mt-5 rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-7 py-4 font-bold text-white transition-smooth hover:opacity-90"
+            type="button"
+          >
+            Fazer cadastro
+          </button>
         </section>
       </div>
     </main>

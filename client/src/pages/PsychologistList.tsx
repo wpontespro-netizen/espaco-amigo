@@ -36,7 +36,7 @@ export default function PsychologistList() {
   return (
     <main className="min-h-screen bg-[#050a1c] px-5 py-6 text-white sm:px-8">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
+        <header className="mb-6">
           <button
             onClick={() => setLocation("/")}
             className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/76 transition-smooth hover:bg-white/10"
@@ -45,21 +45,14 @@ export default function PsychologistList() {
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </button>
-          <button
-            onClick={() => setLocation("/sou-psicologo")}
-            className="rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/78 transition-smooth hover:bg-white/10"
-            type="button"
-          >
-            Sou psicólogo
-          </button>
         </header>
 
         <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111a45] via-[#101633] to-[#080d22] p-6 md:p-8">
           <div className="flex items-center gap-3">
             <UserRound className="h-8 w-8 text-[#86cfff]" />
             <div>
-              <h1 className="text-3xl font-bold">Encontrar psicólogo</h1>
-              <p className="mt-2 text-white/66">Profissionais aprovados pelo Espaço Amigo para uma primeira conversa com cuidado.</p>
+              <h1 className="text-3xl font-bold">Encontre um psicólogo para conversar com cuidado.</h1>
+              <p className="mt-2 text-white/66">Profissionais aprovados pelo Espaço Amigo para uma primeira conversa de acolhimento.</p>
             </div>
           </div>
 
