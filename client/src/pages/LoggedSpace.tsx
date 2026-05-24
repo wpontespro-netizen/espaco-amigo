@@ -433,7 +433,7 @@ export default function LoggedSpace() {
                 ))}
               </div>
               <button
-                onClick={() => setLocation("/professionals")}
+                onClick={() => setLocation("/encontrar-psicologo")}
                 className="mt-5 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white/82 transition-smooth hover:bg-white/10"
                 type="button"
               >

@@ -1,19 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { fallbackPsychologists, fetchApprovedPsychologists, initials, type Psychologist } from "@/lib/psychologists";
 import {
   ArrowRight,
-  Brain,
+  BookOpen,
   Clock3,
-  Footprints,
   Heart,
+  Headphones,
   LockKeyhole,
   LogOut,
   MessageCircle,
-  Moon,
-  PlayCircle,
+  PenLine,
   ShieldCheck,
-  Sparkles,
   Sprout,
   UserPlus,
   UserRound,
@@ -26,38 +23,33 @@ import { useLocation } from "wouter";
 
 const contentCards = [
   {
-    title: "Quando a cabeça não para",
-    text: "Um respiro para acalmar a mente.",
-    icon: Brain,
-    time: "1:12",
+    title: "Exercícios de relaxamento",
+    text: "Técnicas simples para respirar, desacelerar e voltar ao agora.",
+    icon: Wind,
     tone: "from-violet-500/25 via-slate-900/70 to-[#070c22]",
   },
   {
-    title: "Pra quem está sozinho agora",
-    text: "Você não está só. Estamos aqui.",
-    icon: Heart,
-    time: "1:08",
+    title: "Áudios de meditação",
+    text: "Pausas guiadas para atravessar momentos difíceis com mais calma.",
+    icon: Headphones,
     tone: "from-rose-400/25 via-slate-900/65 to-[#111733]",
   },
   {
-    title: "Respira. Um minuto só seu.",
-    text: "Exercício rápido de respiração.",
-    icon: Wind,
-    time: "0:59",
+    title: "Frases e textos de acolhimento",
+    text: "Palavras simples de validação, conforto e apoio emocional.",
+    icon: BookOpen,
     tone: "from-emerald-300/25 via-slate-900/65 to-[#091d20]",
   },
   {
-    title: "Quando tudo parece sem sentido",
-    text: "Não precisa entender tudo agora.",
-    icon: Moon,
-    time: "1:15",
+    title: "Diário emocional",
+    text: "Um espaço para escrever sentimentos e organizar pensamentos.",
+    icon: PenLine,
     tone: "from-indigo-400/25 via-slate-900/70 to-[#07122c]",
   },
   {
-    title: "Pequenos passos contam muito",
-    text: "Você pode ir devagar.",
-    icon: Footprints,
-    time: "1:03",
+    title: "Chat de acolhimento",
+    text: "Um espaço seguro para você falar e ser ouvido quando precisar.",
+    icon: MessageCircle,
     tone: "from-orange-300/25 via-slate-900/65 to-[#1e1325]",
   },
 ];
@@ -93,17 +85,10 @@ export default function Welcome() {
   const [authErrors, setAuthErrors] = useState<Record<string, string>>({});
   const [authMessage, setAuthMessage] = useState("");
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
-  const [approvedPsychologists, setApprovedPsychologists] = useState<Psychologist[] | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("auth") === "complete") openAuthModal("complete");
-  }, []);
-
-  useEffect(() => {
-    fetchApprovedPsychologists()
-      .then(setApprovedPsychologists)
-      .catch(() => setApprovedPsychologists(null));
   }, []);
 
   useEffect(() => {
@@ -113,7 +98,6 @@ export default function Welcome() {
   }, [authMode, setLocation, user]);
 
   const goToChat = () => setLocation("/chat-start");
-  const visiblePsychologists = approvedPsychologists ?? fallbackPsychologists;
   const openAuthModal = (mode: "login" | "signup" | "complete") => {
     setAuthForm(emptyAuthForm);
     setAuthErrors({});
@@ -226,13 +210,13 @@ export default function Welcome() {
               <button onClick={() => scrollToSection("conteudos")} type="button">
                 Conteúdos
               </button>
-              <button onClick={() => scrollToSection("psicologos")} type="button">
+              <button onClick={() => setLocation("/professionals")} type="button">
                 Psicólogos
               </button>
               <button onClick={() => scrollToSection("sobre")} type="button">
                 Sobre
               </button>
-              <button onClick={() => setLocation("/cadastro-psicologo")} type="button">
+              <button onClick={() => setLocation("/professionals")} type="button">
                 Sou psicólogo
               </button>
             </nav>
@@ -290,14 +274,14 @@ export default function Welcome() {
               </div>
 
               <h1 className="text-5xl font-bold leading-[1.04] tracking-normal sm:text-6xl lg:text-7xl">
-                Um lugar seguro para{" "}
+                Você não precisa passar por{" "}
                 <span className="bg-gradient-to-r from-[#f49cc7] via-[#b991ff] to-[#8dd7ff] bg-clip-text text-transparent">
-                  você ser como é.
+                  isso sozinho.
                 </span>
               </h1>
 
               <p className="mt-6 max-w-xl text-lg leading-8 text-white/78">
-                Converse, desabafe, organize seus pensamentos e encontre apoio quando precisar.
+                Quando tudo parece pesado demais, o Espaço Amigo acolhe você com presença, ferramentas simples e caminhos para encontrar apoio humano.
               </p>
 
               <p className="mt-5 flex items-center gap-3 text-base text-[#ffc0da]">
@@ -325,26 +309,26 @@ export default function Welcome() {
             </div>
 
             <div className="relative min-h-[420px] overflow-hidden rounded-[2rem] border border-white/12 bg-[#101735]/70 shadow-2xl shadow-black/30">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#111b42] via-[#221642] to-[#050a1c]" />
-              <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#040817] via-[#0b1230] to-transparent" />
-              <div className="absolute bottom-16 left-[-10%] h-28 w-[58%] rounded-t-full bg-[#060b1b]/80" />
-              <div className="absolute bottom-16 right-[-6%] h-36 w-[66%] rounded-t-full bg-[#0c1534]/90" />
-              <div className="absolute bottom-16 left-[30%] h-24 w-[50%] rounded-t-full bg-[#17204a]/75" />
-              <div className="absolute left-[48%] top-[40%] h-px w-[40%] bg-gradient-to-r from-transparent via-[#ffbd8f]/70 to-transparent" />
-              <Moon className="absolute right-14 top-14 h-11 w-11 rotate-[-24deg] text-[#f7a7c9]" />
-              <div className="absolute right-20 bottom-20 h-28 w-16 rounded-t-full border border-[#ffb886]/40 bg-[#130d19]/70">
-                <div className="absolute left-1/2 top-5 h-12 w-8 -translate-x-1/2 rounded-full bg-[#ffad63]/45 shadow-[0_0_38px_rgba(255,173,99,0.65)]" />
-                <div className="absolute left-1/2 top-[-14px] h-8 w-8 -translate-x-1/2 rounded-full border border-[#ffb886]/40" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#030614] via-[#141034] to-[#442042]" />
+              <div className="absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(circle_at_30%_40%,rgba(70,91,160,0.22),transparent_38%)]" />
+              <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_35%,rgba(255,173,131,0.35),transparent_42%)]" />
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050a1c] to-transparent" />
+              <div className="absolute bottom-20 left-[18%] h-28 w-24 rounded-full bg-[#11182f] opacity-80 blur-sm" />
+              <div className="absolute bottom-16 left-[28%] h-48 w-32 rounded-t-[5rem] bg-[#080d1d]/90 shadow-2xl shadow-black/40" />
+              <div className="absolute bottom-52 left-[32%] h-20 w-20 rounded-full bg-[#151c32]" />
+              <div className="absolute bottom-48 left-[31%] h-10 w-24 rounded-full bg-[#0b1024]/80" />
+              <div className="absolute bottom-32 right-[18%] h-24 w-40 rounded-full bg-[#ffb083]/20 blur-2xl" />
+              <div className="absolute right-14 top-16 h-24 w-24 rounded-full bg-[#ffb083]/30 blur-2xl" />
+              <div className="absolute bottom-28 right-24 h-1 w-44 rounded-full bg-gradient-to-r from-transparent via-[#ffd0aa] to-transparent" />
+              <div className="absolute right-20 bottom-24 h-32 w-20 rounded-t-full border border-[#ffcfaa]/40 bg-[#160f1d]/70">
+                <div className="absolute left-1/2 top-7 h-14 w-9 -translate-x-1/2 rounded-full bg-[#ffad63]/55 shadow-[0_0_42px_rgba(255,173,99,0.7)]" />
               </div>
-              <div className="absolute right-[28%] bottom-24 h-44 w-28 rounded-t-[4rem] bg-[#080d1d]/80 shadow-2xl shadow-black/30" />
-              <div className="absolute right-[30%] bottom-48 h-16 w-16 rounded-full bg-[#080d1d]/95" />
-              <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-[#050a1c] to-transparent" />
               <div className="relative z-10 flex h-full min-h-[420px] flex-col justify-end p-7">
                 <div className="max-w-sm rounded-2xl border border-white/12 bg-[#071027]/72 p-5 backdrop-blur">
-                  <Sparkles className="mb-4 h-8 w-8 text-[#f4a5d7]" />
-                  <p className="text-2xl font-bold leading-tight">Um respiro antes de seguir.</p>
+                  <Heart className="mb-4 h-8 w-8 text-[#f4a5d7]" />
+                  <p className="text-2xl font-bold leading-tight">Um caminho começa com uma presença.</p>
                   <p className="mt-3 text-sm leading-6 text-white/68">
-                    Um começo simples para falar com calma, no seu tempo.
+                    Do peso silencioso para uma luz possível, no seu tempo.
                   </p>
                 </div>
               </div>
@@ -362,7 +346,7 @@ export default function Welcome() {
                 <h2 className="text-3xl font-bold">Pílulas de acolhimento</h2>
               </div>
               <p className="max-w-xl text-white/68">
-                Conteúdos curtos para te apoiar no momento que você precisa.
+                Ferramentas simples para atravessar o momento com um pouco mais de presença.
               </p>
             </div>
             <button
@@ -388,10 +372,6 @@ export default function Welcome() {
                   <Icon className="mb-9 h-8 w-8 text-[#c7a7ff]" />
                   <h3 className="text-xl font-bold leading-snug">{card.title}</h3>
                   <p className="mt-4 text-sm leading-6 text-white/74">{card.text}</p>
-                  <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-black/28 px-3 py-1 text-xs text-white/88">
-                    <PlayCircle className="h-4 w-4" />
-                    {card.time}
-                  </div>
                 </button>
               );
             })}
@@ -437,66 +417,30 @@ export default function Welcome() {
       </section>
 
       <section id="psicologos" className="px-5 py-16 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <div className="mb-3 flex items-center gap-3 text-[#86cfff]">
-                <Users className="h-7 w-7" />
-                <h2 className="text-3xl font-bold">Psicólogos disponíveis</h2>
-              </div>
-              <p className="max-w-xl text-white/68">
-                Profissionais prontos para te acompanhar na sua jornada.
-              </p>
+        <div className="mx-auto grid max-w-7xl gap-8 rounded-3xl border border-white/10 bg-gradient-to-r from-[#111a45] via-[#121a3b] to-[#211336] p-7 shadow-xl shadow-black/25 md:grid-cols-[1fr_0.8fr] md:p-9">
+          <div>
+            <div className="mb-4 flex items-center gap-3 text-[#86cfff]">
+              <Users className="h-7 w-7" />
+              <h2 className="text-3xl font-bold">Apoio humano quando você precisar</h2>
             </div>
+            <p className="max-w-2xl leading-7 text-white/70">
+              O Espaço Amigo também conecta pessoas a psicólogos parceiros. São profissionais avaliados com cuidado, para que a busca por apoio seja mais simples, humana e segura.
+            </p>
+          </div>
+          <div className="flex flex-col justify-center gap-3">
+            <Button
+              onClick={() => setLocation("/encontrar-psicologo")}
+              className="h-auto rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-7 py-5 text-base font-bold text-white"
+            >
+              Encontrar psicólogo
+            </Button>
             <button
-              onClick={() => setLocation("/cadastro-psicologo")}
-              className="flex items-center gap-2 text-sm font-semibold text-[#d7b8ff]"
+              onClick={() => setLocation("/professionals")}
+              className="rounded-2xl border border-white/12 px-7 py-5 text-base font-bold text-white/86 transition-smooth hover:bg-white/10"
               type="button"
             >
               Sou psicólogo
-              <ArrowRight className="h-4 w-4" />
             </button>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {visiblePsychologists.slice(0, 3).map((professional, index) => (
-              <article
-                key={professional.id}
-                className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-lg shadow-black/20 backdrop-blur"
-              >
-                <div className="flex items-center gap-4">
-                  {professional.fotoUrl ? (
-                    <img src={professional.fotoUrl} alt={professional.nome} className="h-16 w-16 rounded-2xl object-cover" />
-                  ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f3a0c5] to-[#8ecfff] text-xl font-bold text-[#071027]">
-                      {initials(professional.nome)}
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-bold">{professional.nome}</h3>
-                    <p className="mt-1 text-sm text-white/66">{professional.especialidadePrincipal}</p>
-                  </div>
-                </div>
-                <p className="mt-4 line-clamp-2 text-sm leading-6 text-white/62">{professional.bio}</p>
-                <div className="mt-5 flex items-center justify-between gap-3">
-                  <span className="flex items-center gap-2 text-sm text-white/78">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        index === 1 ? "bg-[#ff9db8]" : "bg-[#70f29d]"
-                      }`}
-                    />
-                    {professional.horariosDisponiveis}
-                  </span>
-                  <button
-                    onClick={() => setLocation("/professionals")}
-                    className="rounded-xl border border-white/12 px-4 py-2 text-sm font-semibold text-white/90 transition-smooth hover:bg-white/10"
-                    type="button"
-                  >
-                    Ver profissional
-                  </button>
-                </div>
-              </article>
-            ))}
           </div>
         </div>
       </section>
