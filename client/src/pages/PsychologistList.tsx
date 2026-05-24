@@ -34,8 +34,15 @@ export default function PsychologistList() {
   }, [professionals, search, specialty]);
 
   return (
-    <main className="min-h-screen bg-[#050a1c] px-5 py-6 text-white sm:px-8">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen overflow-hidden bg-[#050a1c] px-5 py-6 text-white sm:px-8">
+      <div
+        className="pointer-events-none fixed inset-0 opacity-60"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20% 10%, rgba(159,130,255,0.28), transparent 32%), radial-gradient(circle at 80% 18%, rgba(255,156,145,0.18), transparent 30%), linear-gradient(135deg, #050a1c 0%, #08122f 55%, #140c2b 100%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-7xl">
         <header className="mb-6">
           <button
             onClick={() => setLocation("/")}
@@ -47,16 +54,27 @@ export default function PsychologistList() {
           </button>
         </header>
 
-        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111a45] via-[#101633] to-[#080d22] p-6 md:p-8">
-          <div className="flex items-center gap-3">
-            <UserRound className="h-8 w-8 text-[#86cfff]" />
+        <section className="rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-2xl shadow-black/25 backdrop-blur md:p-8">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Encontre um psicólogo para conversar com cuidado.</h1>
-              <p className="mt-2 text-white/66">Profissionais aprovados pelo Espaço Amigo para uma primeira conversa de acolhimento.</p>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/8 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#d7b8ff]">
+                <UserRound className="h-4 w-4" />
+                Apoio humano
+              </div>
+              <h1 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
+                Encontre um psicólogo para conversar com cuidado.
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-white/68">
+                Profissionais aprovados pelo Espaço Amigo para uma primeira conversa de acolhimento.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#9f82ff]/20 to-[#ff9c91]/16 p-5 text-sm text-white/72">
+              <p className="font-semibold text-white">Perfis avaliados</p>
+              <p className="mt-2">A listagem mostra somente profissionais aprovados.</p>
             </div>
           </div>
 
-          <div className="mt-7 grid gap-3 md:grid-cols-[1fr_260px]">
+          <div className="mt-8 grid gap-3 rounded-3xl border border-white/10 bg-[#070d24]/70 p-4 md:grid-cols-[1fr_260px]">
             <label className="relative block">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/42" />
               <input
@@ -79,9 +97,9 @@ export default function PsychologistList() {
             </select>
           </div>
 
-          <div className="mt-7 grid gap-5 md:grid-cols-2">
+          <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {filteredProfessionals.map((professional) => (
-              <article key={professional.id} className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-xl shadow-black/20">
+              <article key={professional.id} className="rounded-3xl border border-white/10 bg-white/[0.07] p-5 shadow-xl shadow-black/20 transition-smooth hover:-translate-y-1 hover:border-white/20">
                 <div className="flex items-start gap-4">
                   {professional.fotoUrl ? (
                     <img src={professional.fotoUrl} alt={professional.nome} className="h-20 w-20 rounded-2xl object-cover" />

@@ -92,6 +92,6 @@ export function buildProfessionalMailto(professionalName: string, user?: { name?
 
 export function buildWhatsAppLink(professional: Pick<Psychologist, "nome" | "whatsapp">) {
   const phone = professional.whatsapp.replace(/\D/g, "");
-  const message = `Olá, encontrei seu perfil no Espaço Amigo e gostaria de conversar.`;
+  const message = "Olá, encontrei seu perfil no Espaço Amigo e gostaria de conversar sobre um acolhimento online.";
   return `https://wa.me/${phone || "5521973486357"}?text=${encodeURIComponent(message)}`;
 }
