@@ -11,14 +11,14 @@ export default function Home() {
   // const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
+    <div className="ea-bg flex flex-col">
+      <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         {/* Example: lucide-react for icons */}
         <Loader2 className="animate-spin" />
-        Example Page
+        <p className="text-white/70">Espaço Amigo</p>
         {/* Example: Streamdown for markdown rendering */}
         <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
+        <Button className="ea-button px-6 py-4">Continuar</Button>
       </main>
     </div>
   );

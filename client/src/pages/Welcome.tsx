@@ -337,7 +337,7 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="conteudos" className="relative bg-[#f6f1ff] px-5 py-16 text-[#131936] sm:px-8 lg:px-12">
+      <section id="conteudos" className="relative bg-[#050a1c] px-5 py-16 text-white sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl">
           <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
@@ -345,7 +345,7 @@ export default function Welcome() {
                 <Sprout className="h-7 w-7" />
                 <h2 className="text-3xl font-bold">Pílulas de acolhimento</h2>
               </div>
-              <p className="max-w-xl text-[#5f6580]">
+              <p className="max-w-xl text-white/68">
                 Ferramentas simples para atravessar o momento com um pouco mais de presença.
               </p>
             </div>
@@ -379,18 +379,18 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="chat" className="bg-[#f6f1ff] px-5 py-8 sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 rounded-[2rem] border border-[#e0d8fb] bg-white p-6 text-[#131936] shadow-xl shadow-[#8b74bd]/15 md:grid-cols-[0.7fr_1.25fr_0.8fr] md:p-8">
+      <section id="chat" className="bg-[#050a1c] px-5 py-8 sm:px-8 lg:px-12">
+        <div className="ea-panel mx-auto grid max-w-7xl items-center gap-8 p-6 md:grid-cols-[0.7fr_1.25fr_0.8fr] md:p-8">
           <div className="flex min-h-44 items-center justify-center rounded-3xl bg-gradient-to-br from-[#b99cff]/28 to-[#ff93b3]/18">
             <Heart className="h-24 w-24 fill-[#ffb3ce]/45 text-[#d3b6ff]" />
           </div>
 
           <div>
             <h2 className="text-3xl font-bold">Precisa conversar agora?</h2>
-            <p className="mt-4 max-w-xl leading-7 text-[#5f6580]">
+            <p className="mt-4 max-w-xl leading-7 text-white/68">
               O chat de acolhimento é um espaço seguro para você falar, organizar seus pensamentos e ser ouvido.
             </p>
-            <div className="mt-7 flex flex-wrap gap-4 text-sm text-[#4e5570]">
+            <div className="mt-7 flex flex-wrap gap-4 text-sm text-white/76">
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-[#d7b8ff]" />
                 Sigilo e segurança
@@ -416,14 +416,14 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="psicologos" className="bg-[#f6f1ff] px-5 py-16 text-[#131936] sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-8 rounded-[2rem] border border-[#e0d8fb] bg-gradient-to-r from-white via-[#fbf9ff] to-[#f0e9ff] p-7 shadow-xl shadow-[#8b74bd]/15 md:grid-cols-[1fr_0.8fr] md:p-9">
+      <section id="psicologos" className="bg-[#050a1c] px-5 py-16 text-white sm:px-8 lg:px-12">
+        <div className="ea-panel mx-auto grid max-w-7xl gap-8 bg-gradient-to-r from-white/[0.07] via-white/[0.05] to-[#8B5CF6]/10 p-7 md:grid-cols-[1fr_0.8fr] md:p-9">
           <div>
             <div className="mb-4 flex items-center gap-3 text-[#86cfff]">
               <Users className="h-7 w-7" />
               <h2 className="text-3xl font-bold">Apoio humano quando você precisar</h2>
             </div>
-            <p className="max-w-2xl leading-7 text-[#5f6580]">
+            <p className="max-w-2xl leading-7 text-white/68">
               O Espaço Amigo também conecta pessoas a psicólogos parceiros. São profissionais avaliados com cuidado, para que a busca por apoio seja mais simples, humana e segura.
             </p>
           </div>
@@ -436,7 +436,7 @@ export default function Welcome() {
             </Button>
             <button
               onClick={() => setLocation("/sou-psicologo")}
-              className="rounded-2xl border border-[#d8cef6] bg-white px-7 py-5 text-base font-bold text-[#5c3db2] transition-smooth hover:bg-[#f8f4ff]"
+              className="ea-button-ghost px-7 py-5 text-base"
               type="button"
             >
               Sou psicólogo
@@ -445,7 +445,7 @@ export default function Welcome() {
         </div>
       </section>
 
-      <section id="sobre" className="bg-[#f6f1ff] px-5 pb-8 sm:px-8 lg:px-12">
+      <section id="sobre" className="bg-[#050a1c] px-5 pb-8 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#101735] p-7 text-white shadow-xl shadow-[#8b74bd]/15 md:p-9">
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#d7b8ff]">Por que o Espaço Amigo existe</p>
           <h2 className="mt-3 max-w-3xl text-3xl font-bold leading-tight">
@@ -457,23 +457,23 @@ export default function Welcome() {
         </div>
       </section>
 
-      <footer className="bg-[#f6f1ff] px-5 pb-10 sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-3xl border border-[#d8cef6] bg-white p-7 text-[#131936] shadow-xl shadow-[#8b74bd]/15 md:grid-cols-[1.2fr_1.6fr] md:items-center">
+      <footer className="bg-[#050a1c] px-5 pb-10 sm:px-8 lg:px-12">
+        <div className="ea-panel mx-auto grid max-w-7xl gap-6 p-7 md:grid-cols-[1.2fr_1.6fr] md:items-center">
           <div>
             <p className="text-2xl font-bold">Você importa. Você não está sozinho.</p>
-            <p className="mt-2 text-[#6b718a]">by Pensando Bem</p>
+            <p className="mt-2 text-white/58">by Pensando Bem</p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <span className="flex items-center gap-3 text-sm text-[#535a76]">
+            <span className="flex items-center gap-3 text-sm text-white/72">
               <ShieldCheck className="h-6 w-6 text-[#ff9fca]" />
               Ambiente seguro
             </span>
-            <span className="flex items-center gap-3 text-sm text-[#535a76]">
+            <span className="flex items-center gap-3 text-sm text-white/72">
               <LockKeyhole className="h-6 w-6 text-[#ff9fca]" />
               Privacidade garantida
             </span>
-            <span className="flex items-center gap-3 text-sm text-[#535a76]">
+            <span className="flex items-center gap-3 text-sm text-white/72">
               <Heart className="h-6 w-6 text-[#ff9fca]" />
               Acolhimento de verdade
             </span>

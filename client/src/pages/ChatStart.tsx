@@ -33,43 +33,23 @@ export default function ChatStart() {
   };
 
   return (
-    <div className="mobile-screen min-h-screen flex flex-col bg-white">
+    <div className="mobile-screen min-h-screen flex flex-col text-white">
       {/* Header */}
-      <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
+      <div className="flex items-center gap-4 border-b border-white/10 bg-[#071027]/80 px-6 py-4 backdrop-blur">
         <button
           onClick={() => setLocation("/")}
-          className="p-2 hover:bg-gray-50 rounded-lg transition-smooth"
+          className="rounded-xl p-2 text-white/78 transition-smooth hover:bg-white/10 hover:text-white"
         >
-          <ArrowLeft size={24} style={{ color: "oklch(0.3 0.02 65)" }} />
+          <ArrowLeft size={24} />
         </button>
-        <h2
-          className="text-xl font-bold"
-          style={{
-            fontFamily: "'Poppins', sans-serif",
-            color: "oklch(0.3 0.02 65)",
-          }}
-        >
-          Espaço Amigo
-        </h2>
+        <h2 className="text-xl font-bold">Espaço Amigo</h2>
       </div>
 
       {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col justify-center px-6 py-8">
         {/* Mensagem inicial do app */}
-        <div
-          className="mb-8 p-4 rounded-3xl max-w-sm"
-          style={{
-            backgroundColor: "oklch(0.97 0.01 65)",
-          }}
-        >
-          <p
-            style={{
-              color: "oklch(0.3 0.02 65)",
-              fontFamily: "'Inter', sans-serif",
-              lineHeight: "1.6",
-              fontSize: "16px",
-            }}
-          >
+        <div className="ea-panel mb-8 max-w-sm p-5">
+          <p className="text-base leading-7 text-white/86">
             {isLoading
               ? "Só um instante..."
               : "Oi… que bom que você está aqui"}
@@ -84,7 +64,7 @@ export default function ChatStart() {
       </div>
 
       {/* Campo de entrada e botão */}
-      <div className="px-6 py-6 border-t border-gray-100 bg-white">
+      <div className="border-t border-white/10 bg-[#071027]/80 px-6 py-6 backdrop-blur">
         <div className="flex gap-3">
           <input
             type="text"
@@ -97,26 +77,16 @@ export default function ChatStart() {
               }
             }}
             disabled={isLoading}
-            className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 transition-smooth"
-            style={{
-              borderColor: "oklch(0.92 0.01 65)",
-              color: "oklch(0.3 0.02 65)",
-              fontFamily: "'Inter', sans-serif",
-            } as React.CSSProperties}
+            className="ea-input flex-1"
           />
           <button
             onClick={handleSend}
             disabled={!name.trim() || isLoading}
-            className="p-3 rounded-2xl transition-smooth disabled:opacity-50"
-            style={{
-              backgroundColor: name.trim()
-                ? "oklch(0.6 0.15 240)"
-                : "oklch(0.92 0.01 65)",
-            }}
+            className="ea-button p-3 disabled:opacity-50"
           >
             <Send
               size={20}
-              color={name.trim() ? "white" : "oklch(0.55 0.02 65)"}
+              color={name.trim() ? "white" : "rgba(255,255,255,0.5)"}
             />
           </button>
         </div>

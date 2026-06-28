@@ -20,49 +20,27 @@ export default function Referral() {
   };
 
   return (
-    <div className="mobile-screen min-h-screen flex flex-col bg-white">
+    <div className="mobile-screen min-h-screen flex flex-col text-white">
       {/* Header */}
-      <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
+      <div className="flex items-center gap-4 border-b border-white/10 bg-[#071027]/80 px-6 py-4 backdrop-blur">
         <button
           onClick={() => setLocation("/")}
-          className="p-2 hover:bg-gray-50 rounded-lg transition-smooth"
+          className="rounded-xl p-2 text-white/78 transition-smooth hover:bg-white/10 hover:text-white"
         >
-          <ArrowLeft size={24} style={{ color: "oklch(0.3 0.02 65)" }} />
+          <ArrowLeft size={24} />
         </button>
-        <h2
-          className="text-xl font-bold"
-          style={{
-            fontFamily: "'Poppins', sans-serif",
-            color: "oklch(0.3 0.02 65)",
-          }}
-        >
-          Espaço Amigo
-        </h2>
+        <h2 className="text-xl font-bold">Espaço Amigo</h2>
       </div>
 
       {/* Conteúdo principal */}
       <div className="flex-1 overflow-y-auto px-6 py-8">
         {/* Título */}
-        <h2
-          className="text-2xl font-bold mb-4 text-center"
-          style={{
-            fontFamily: "'Poppins', sans-serif",
-            color: "oklch(0.3 0.02 65)",
-          }}
-        >
+        <h2 className="mb-4 text-center text-2xl font-bold">
           Talvez conversar com um psicólogo possa te ajudar.
         </h2>
 
         {/* Subtexto */}
-        <p
-          className="text-center mb-10"
-          style={{
-            color: "oklch(0.55 0.02 65)",
-            fontFamily: "'Inter', sans-serif",
-            lineHeight: "1.6",
-            fontSize: "16px",
-          }}
-        >
+        <p className="mb-10 text-center text-base leading-7 text-white/68">
           Posso te indicar profissionais que trabalham com situações como a sua.
         </p>
 
@@ -82,21 +60,9 @@ export default function Referral() {
               text: "Atendimento presencial",
             },
           ].map((item, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-4 p-4 rounded-2xl transition-smooth"
-              style={{
-                backgroundColor: "oklch(0.97 0.01 65)",
-              }}
-            >
-              <div style={{ color: "oklch(0.6 0.15 240)" }}>{item.icon}</div>
-              <span
-                style={{
-                  color: "oklch(0.3 0.02 65)",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: "15px",
-                }}
-              >
+            <div key={idx} className="ea-card flex items-center gap-4 p-4">
+              <div className="text-[#F472B6]">{item.icon}</div>
+              <span className="text-sm text-white/82">
                 {item.text}
               </span>
             </div>
@@ -104,26 +70,16 @@ export default function Referral() {
         </div>
 
         {/* Mensagem de acolhimento */}
-        <p
-          className="text-center text-sm mb-8"
-          style={{
-            color: "oklch(0.55 0.02 65)",
-            fontFamily: "'Inter', sans-serif",
-          }}
-        >
+        <p className="mb-8 text-center text-sm text-white/58">
           Escolha com calma. Você está no controle.
         </p>
       </div>
 
       {/* Botão de ação */}
-      <div className="px-6 py-6 border-t border-gray-100 bg-white">
+      <div className="border-t border-white/10 bg-[#071027]/80 px-6 py-6 backdrop-blur">
         <Button
           onClick={handleViewReferrals}
-          className="w-full py-6 text-lg font-semibold rounded-2xl transition-smooth"
-          style={{
-            backgroundColor: "oklch(0.6 0.15 240)",
-            color: "white",
-          }}
+          className="ea-button w-full py-6 text-lg"
         >
           Ver indicações
         </Button>
@@ -131,12 +87,7 @@ export default function Referral() {
         {/* Link para voltar */}
         <button
           onClick={() => setLocation("/")}
-          className="w-full mt-3 py-3 text-sm font-semibold rounded-2xl transition-smooth"
-          style={{
-            color: "oklch(0.55 0.02 65)",
-            fontFamily: "'Inter', sans-serif",
-            backgroundColor: "transparent",
-          }}
+          className="mt-3 w-full rounded-2xl py-3 text-sm font-semibold text-white/62 transition-smooth hover:bg-white/10 hover:text-white"
         >
           Voltar ao início
         </button>

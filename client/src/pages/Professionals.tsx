@@ -5,18 +5,18 @@ export default function Professionals() {
   const [, setLocation] = useLocation();
 
   return (
-    <main className="min-h-screen bg-[#f6f1ff] px-5 py-6 text-[#131936] sm:px-8">
+    <main className="ea-bg px-5 py-6 sm:px-8">
       <div className="mx-auto max-w-6xl">
         <button
           onClick={() => setLocation("/")}
-          className="mb-6 inline-flex items-center gap-2 rounded-2xl border border-[#d8cef6] bg-white px-4 py-3 text-sm text-[#5f6580] shadow-sm transition-smooth hover:bg-[#fbf9ff]"
+          className="ea-button-ghost mb-6 inline-flex items-center gap-2 px-4 py-3 text-sm"
           type="button"
         >
           <ArrowLeft className="h-4 w-4" />
           Voltar
         </button>
 
-        <section className="overflow-hidden rounded-[2rem] border border-[#d8cef6] bg-white p-6 shadow-2xl shadow-[#8b74bd]/15 md:p-9">
+        <section className="ea-panel overflow-hidden p-6 md:p-9">
           <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-center">
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#f1eaff] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#7a57cb]">
@@ -26,7 +26,7 @@ export default function Professionals() {
               <h1 className="max-w-3xl text-4xl font-bold leading-tight">
                 Faça parte da rede de psicólogos parceiros do Espaço Amigo
               </h1>
-              <p className="mt-5 max-w-2xl leading-7 text-[#5f6580]">
+              <p className="mt-5 max-w-2xl leading-7 text-white/68">
                 Ajude pessoas que estão passando por momentos difíceis a encontrar acolhimento humano, ético e online.
               </p>
               <div className="mt-7">
@@ -61,7 +61,7 @@ export default function Professionals() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[2rem] border border-[#d8cef6] bg-white p-6 shadow-xl shadow-[#8b74bd]/10 md:p-8">
+        <section className="ea-panel mt-6 p-6 md:p-8">
           <h2 className="text-2xl font-bold">Por que atender pelo Espaço Amigo?</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             {[
@@ -72,7 +72,7 @@ export default function Professionals() {
               { label: "Contato direto pelo WhatsApp", icon: MessageCircle },
             ].map(({ label, icon: CardIcon }) => {
               return (
-                <div key={label} className="rounded-3xl border border-[#e0d8fb] bg-[#fbf9ff] p-5">
+                <div key={label} className="ea-card p-5">
                   <CardIcon className="h-7 w-7 text-[#7a57cb]" />
                   <p className="mt-4 text-sm font-bold leading-5">{label}</p>
                 </div>
@@ -82,7 +82,7 @@ export default function Professionals() {
         </section>
 
         <section className="mt-6 grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-[#d8cef6] bg-white p-6 shadow-xl shadow-[#8b74bd]/10 md:p-8">
+          <div className="ea-panel p-6 md:p-8">
             <h2 className="text-2xl font-bold">Como funciona?</h2>
             <div className="mt-5 space-y-4">
               {[
@@ -91,9 +91,9 @@ export default function Professionals() {
                 "Após aprovação, seu perfil fica visível",
                 "Usuários entram em contato pelo WhatsApp",
               ].map((step, index) => (
-                <div key={step} className="flex gap-4 rounded-2xl bg-[#f6f1ff] p-4">
+                <div key={step} className="flex gap-4 rounded-2xl bg-white/[0.06] p-4">
                   <span className="font-bold text-[#7a57cb]">0{index + 1}</span>
-                  <p className="font-semibold text-[#333a58]">{step}</p>
+                  <p className="font-semibold text-white/82">{step}</p>
                 </div>
               ))}
             </div>
@@ -108,7 +108,7 @@ export default function Professionals() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[2rem] border border-[#d8cef6] bg-white p-8 text-center shadow-xl shadow-[#8b74bd]/10">
+        <section className="ea-panel mt-6 p-8 text-center">
           <h2 className="text-3xl font-bold">Quer fazer parte?</h2>
           <button
             onClick={() => setLocation("/cadastro-psicologo")}

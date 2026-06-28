@@ -96,8 +96,8 @@ export default function PsychologistSignup() {
 
   if (submitted) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#050a1c] px-5 text-white">
-        <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-white/[0.06] p-8 text-center shadow-2xl">
+      <main className="ea-bg flex items-center justify-center px-5">
+        <div className="ea-panel w-full max-w-xl p-8 text-center">
           <CheckCircle className="mx-auto h-12 w-12 text-[#a5ffc1]" />
           <h1 className="mt-5 text-3xl font-bold">Recebemos seu cadastro.</h1>
           <p className="mt-4 leading-7 text-white/70">
@@ -112,14 +112,21 @@ export default function PsychologistSignup() {
   }
 
   return (
-    <main className="min-h-screen bg-[#050a1c] px-5 py-6 text-white sm:px-8">
+    <main className="ea-bg px-5 py-6 sm:px-8">
       <div className="mx-auto max-w-5xl">
-        <button onClick={() => setLocation("/")} className="mb-6 inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm text-white/76 transition-smooth hover:bg-white/10" type="button">
+        <button onClick={() => setLocation("/")} className="ea-button-ghost mb-6 inline-flex items-center gap-2 px-4 py-3 text-sm" type="button">
           <ArrowLeft className="h-4 w-4" />
           Voltar
         </button>
 
-        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#111a45] via-[#101633] to-[#080d22] p-6 shadow-2xl md:p-8">
+        <section className="ea-panel p-6 md:p-8">
+          <div className="mb-6 flex items-center gap-3 rounded-3xl border border-white/10 bg-white/[0.05] p-4">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#F472B6] text-sm font-bold">1</div>
+            <div>
+              <p className="font-bold">Dados profissionais</p>
+              <p className="text-sm text-white/56">Envie suas informações para avaliação do Espaço Amigo.</p>
+            </div>
+          </div>
           <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/8 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#d7b8ff]">
@@ -149,12 +156,12 @@ export default function PsychologistSignup() {
 
             <label className="block md:col-span-2">
               <span className="text-sm font-semibold text-white/78">Foto profissional</span>
-              <div className="mt-2 grid gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:grid-cols-[120px_1fr] sm:items-center">
+              <div className="mt-2 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.06] p-4 sm:grid-cols-[120px_1fr] sm:items-center">
                 <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl bg-white/10">
                   {photoPreview ? <img src={photoPreview} alt="Preview da foto" className="h-full w-full object-cover" /> : <ImagePlus className="h-8 w-8 text-[#d7b8ff]" />}
                 </div>
                 <div>
-                  <input accept="image/*" onChange={(event) => pickPhoto(event.target.files?.[0])} type="file" />
+                  <input accept="image/*" onChange={(event) => pickPhoto(event.target.files?.[0])} className="block w-full text-sm text-white/70 file:mr-4 file:rounded-xl file:border-0 file:bg-gradient-to-r file:from-[#8B5CF6] file:to-[#F472B6] file:px-4 file:py-2 file:font-semibold file:text-white" type="file" />
                   <p className="mt-2 text-xs text-white/50">PNG, JPG ou WEBP até 2MB.</p>
                   {errors.fotoUrl ? <p className="mt-1 text-xs text-[#ffb3ce]">{errors.fotoUrl}</p> : null}
                 </div>
@@ -163,21 +170,21 @@ export default function PsychologistSignup() {
 
             <label className="block md:col-span-2">
               <span className="text-sm font-semibold text-white/78">Bio curta</span>
-              <textarea value={form.bio} onChange={(event) => updateField("bio", event.target.value)} className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60" />
+              <textarea value={form.bio} onChange={(event) => updateField("bio", event.target.value)} className="ea-input mt-2 min-h-28 w-full" />
               {errors.bio ? <p className="mt-1 text-xs text-[#ffb3ce]">{errors.bio}</p> : null}
             </label>
 
             <div className="md:col-span-2">
               <span className="text-sm font-semibold text-white/78">Horários disponíveis</span>
-              <div className="mt-2 space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <div className="mt-2 space-y-3 rounded-3xl border border-white/10 bg-white/[0.05] p-4">
                 {schedule.map((item, index) => (
-                  <div key={item.day} className="grid gap-3 rounded-2xl bg-white/[0.04] p-3 sm:grid-cols-[1fr_130px_130px] sm:items-center">
+                  <div key={item.day} className="grid gap-3 rounded-2xl bg-white/[0.06] p-3 sm:grid-cols-[1fr_130px_130px] sm:items-center">
                     <label className="flex items-center gap-3 text-sm font-semibold text-white/80">
                       <input checked={item.active} onChange={(event) => updateSchedule(index, { active: event.target.checked })} type="checkbox" />
                       {item.day}
                     </label>
-                    <input aria-label={`Início ${item.day}`} className="rounded-xl border border-white/10 bg-[#101735] px-3 py-2 text-white outline-none" disabled={!item.active} onChange={(event) => updateSchedule(index, { start: event.target.value })} type="time" value={item.start} />
-                    <input aria-label={`Fim ${item.day}`} className="rounded-xl border border-white/10 bg-[#101735] px-3 py-2 text-white outline-none" disabled={!item.active} onChange={(event) => updateSchedule(index, { end: event.target.value })} type="time" value={item.end} />
+                    <input aria-label={`Início ${item.day}`} className="ea-input px-3 py-2 disabled:opacity-40" disabled={!item.active} onChange={(event) => updateSchedule(index, { start: event.target.value })} type="time" value={item.start} />
+                    <input aria-label={`Fim ${item.day}`} className="ea-input px-3 py-2 disabled:opacity-40" disabled={!item.active} onChange={(event) => updateSchedule(index, { end: event.target.value })} type="time" value={item.end} />
                   </div>
                 ))}
               </div>
@@ -185,7 +192,7 @@ export default function PsychologistSignup() {
             </div>
 
             {message ? <p className="text-sm text-[#ffb3ce] md:col-span-2">{message}</p> : null}
-            <Button className="h-auto rounded-2xl bg-gradient-to-r from-[#9f82ff] to-[#ff9c91] px-6 py-5 text-base font-bold text-white md:col-span-2" disabled={isSubmitting} type="submit">
+            <Button className="ea-button h-auto px-6 py-5 text-base md:col-span-2" disabled={isSubmitting} type="submit">
               <Send className="mr-2 h-5 w-5" />
               {isSubmitting ? "Enviando..." : "Enviar cadastro para avaliação"}
             </Button>
@@ -200,7 +207,7 @@ function Field({ label, value, error, type = "text", onChange }: { label: string
   return (
     <label className="block">
       <span className="text-sm font-semibold text-white/78">{label}</span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none transition-smooth focus:border-[#d7b8ff]/60" type={type} />
+      <input value={value} onChange={(event) => onChange(event.target.value)} className="ea-input mt-2 w-full" type={type} />
       {error ? <p className="mt-1 text-xs text-[#ffb3ce]">{error}</p> : null}
     </label>
   );
